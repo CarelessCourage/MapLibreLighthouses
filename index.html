@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
-    <title></title>
+    <title>lighthouse</title>
     <meta
       name="viewport"
       content="initial-scale=1,maximum-scale=1,user-scalable=no"
@@ -43,7 +43,20 @@
   </head>
   <body>
     <div id="map"></div>
-    <div id="loader" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 5px; font-family: sans-serif; z-index: 1000;">
+    <div
+      id="loader"
+      style="
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 20px;
+        border-radius: 5px;
+        font-family: sans-serif;
+        z-index: 1000;
+      "
+    >
       Loading nautical charts...
     </div>
     <pre id="features"></pre>
@@ -103,9 +116,11 @@
         value="toporasterwms"
       />
       <label for="toporasterwms">Topografisk Raster WMS</label>
-      <br/>
-      <label style="margin-top:6px;display:inline-block;font-weight:bold;">Blink method:</label>
-      <select id="blinkMethod" style="margin-left:4px;">
+      <br />
+      <label style="margin-top: 6px; display: inline-block; font-weight: bold"
+        >Blink method:</label
+      >
+      <select id="blinkMethod" style="margin-left: 4px">
         <option value="filter">Filter (original)</option>
         <option value="shader">Shader (custom layer)</option>
       </select>
@@ -114,16 +129,18 @@
     <script src="shaderBlink.js"></script>
     <script>
       var blinkMethod = 'filter';
-      document.getElementById('blinkMethod').addEventListener('change', function(e) {
-        blinkMethod = e.target.value;
-        if (blinkMethod === 'shader') {
-          map.setFilter('LIGHTS_SECTOR_CENTER', false);
-          map.setFilter('LIGHTS_SECTOR_CENTER_LONG_VALNMR', false);
-          shaderBlinkCtrl.setActive(true);
-        } else {
-          shaderBlinkCtrl.setActive(false);
-        }
-      });
+      document
+        .getElementById('blinkMethod')
+        .addEventListener('change', function (e) {
+          blinkMethod = e.target.value;
+          if (blinkMethod === 'shader') {
+            map.setFilter('LIGHTS_SECTOR_CENTER', false);
+            map.setFilter('LIGHTS_SECTOR_CENTER_LONG_VALNMR', false);
+            shaderBlinkCtrl.setActive(true);
+          } else {
+            shaderBlinkCtrl.setActive(false);
+          }
+        });
 
       var map = new maplibregl.Map({
         container: 'map',
@@ -133,7 +150,7 @@
         hash: true,
       });
 
-      map.on('load', function() {
+      map.on('load', function () {
         document.getElementById('loader').style.display = 'none';
       });
 
@@ -237,11 +254,15 @@
               var lfUfid = lf.properties.ufid;
               if (lfUfid && intersectingUfids[lfUfid] && !seenUfids[lfUfid]) {
                 seenUfids[lfUfid] = true;
-                var merged = Object.assign({}, lf.properties, intersectingUfids[lfUfid]);
+                var merged = Object.assign(
+                  {},
+                  lf.properties,
+                  intersectingUfids[lfUfid]
+                );
                 matchedLightPoints.push({
                   type: 'Feature',
                   geometry: lf.geometry,
-                  properties: merged
+                  properties: merged,
                 });
               }
             }
