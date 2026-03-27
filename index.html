@@ -129,16 +129,24 @@
     <script src="shaderBlink.js"></script>
     <script>
       var blinkMethod = 'filter';
+      var animationTimer = null;
       document
         .getElementById('blinkMethod')
         .addEventListener('change', function (e) {
           blinkMethod = e.target.value;
           if (blinkMethod === 'shader') {
+            // Stop the filter animation loop entirely
+            if (animationTimer !== null) {
+              clearTimeout(animationTimer);
+              animationTimer = null;
+            }
             map.setFilter('LIGHTS_SECTOR_CENTER', false);
             map.setFilter('LIGHTS_SECTOR_CENTER_LONG_VALNMR', false);
             shaderBlinkCtrl.setActive(true);
           } else {
             shaderBlinkCtrl.setActive(false);
+            // Restart the filter animation loop
+            animationTimer = setTimeout(animationStep, animationStepMS);
           }
         });
 
@@ -274,10 +282,6 @@
       });
 
       function animationStep() {
-        if (blinkMethod !== 'filter') {
-          setTimeout(animationStep, animationStepMS);
-          return;
-        }
         var now = new Date();
         var currentSeconds = now.getSeconds();
         var currentMilliSeconds = now % 60000;
@@ -308,9 +312,9 @@
           );
         }
 
-        setTimeout(animationStep, animationStepMS);
+        animationTimer = setTimeout(animationStep, animationStepMS);
       }
-      setTimeout(animationStep, animationStepMS);
+      animationTimer = setTimeout(animationStep, animationStepMS);
 
       map.on('style.load', function (e) {
         for (var i = 0; i < inputs.length; i++) {
