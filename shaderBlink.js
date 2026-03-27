@@ -29,6 +29,167 @@
  */
 var BLINK_TEXTURE_WIDTH = 480;
 
+var VERTEX_SHADER_SOURCE = '#version 300 es\n' +
+  'uniform mat4 u_matrix;\n' +
+  'in vec2 a_pos;\n' +
+  'in vec3 a_color;\n' +
+  'in float a_lightIndex;\n' +
+  'out vec3 v_color;\n' +
+  'out float v_lightIndex;\n' +
+  'void main() {\n' +
+  '  gl_Position = u_matrix * vec4(a_pos, 0.0, 1.0);\n' +
+  '  gl_PointSize = 12.0;\n' +
+  '  v_color = a_color;\n' +
+  '  v_lightIndex = a_lightIndex;\n' +
+  '}\n';
+
+var FRAGMENT_SHADER_SOURCE = '#version 300 es\n' +
+  'precision highp float;\n' +
+  'uniform float u_time;\n' +
+  'uniform sampler2D u_blinkPattern;\n' +
+  'uniform float u_lightCount;\n' +
+  'in vec3 v_color;\n' +
+  'in float v_lightIndex;\n' +
+  'out vec4 fragColor;\n' +
+  'void main() {\n' +
+  '  vec2 center = gl_PointCoord - vec2(0.5);\n' +
+  '  float dist = length(center);\n' +
+  '  if (dist > 0.5) discard;\n' +
+  '  float minuteMs = u_time;\n' +
+  '  float texY = (v_lightIndex + 0.5) / u_lightCount;\n' +
+  '  float slot60 = floor(minuteMs / 1000.0);\n' +
+  '  float slot120 = floor(minuteMs / 500.0);\n' +
+  '  float slot240 = floor(minuteMs / 250.0);\n' +
+  '  float slot480 = floor(minuteMs / 125.0);\n' +
+  '  float texR = texture(u_blinkPattern, vec2((slot60 + 0.5) / ' + BLINK_TEXTURE_WIDTH + '.0, texY)).r;\n' +
+  '  float texG = texture(u_blinkPattern, vec2((slot120 + 0.5) / ' + BLINK_TEXTURE_WIDTH + '.0, texY)).g;\n' +
+  '  float texB = texture(u_blinkPattern, vec2((slot240 + 0.5) / ' + BLINK_TEXTURE_WIDTH + '.0, texY)).b;\n' +
+  '  float texA = texture(u_blinkPattern, vec2((slot480 + 0.5) / ' + BLINK_TEXTURE_WIDTH + '.0, texY)).a;\n' +
+  '  float isOn = max(max(texR, texG), max(texB, texA));\n' +
+  '  if (isOn < 0.5) discard;\n' +
+  '  float edge = smoothstep(0.5, 0.4, dist);\n' +
+  '  fragColor = vec4(v_color * edge, edge);\n' +
+  '}\n';
+
+function compileShader(gl, type, source) {
+  var shader = gl.createShader(type);
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+  }
+  return shader;
+}
+
+function linkProgram(gl, vertexShader, fragmentShader) {
+  var program = gl.createProgram();
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('Program link error:', gl.getProgramInfoLog(program));
+  }
+  return program;
+}
+
+function parseHexColor(hex) {
+  if (!hex || hex.length < 7) return [1.0, 1.0, 0.0];
+  var r = parseInt(hex.substring(1, 3), 16) / 255.0;
+  var g = parseInt(hex.substring(3, 5), 16) / 255.0;
+  var b = parseInt(hex.substring(5, 7), 16) / 255.0;
+  return [r, g, b];
+}
+
+function getFeatureCenter(f) {
+  if (f.geometry.type === 'Point') {
+    return { lng: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] };
+  }
+  var centroid = turf.centroid(f);
+  return { lng: centroid.geometry.coordinates[0], lat: centroid.geometry.coordinates[1] };
+}
+
+function parseBlinkSlots(props) {
+  var lightOnN = props['LIGHT_ON_N'] || 60;
+  var blinkSlots = [];
+  for (var s = 0; s < lightOnN; s++) {
+    blinkSlots.push(!!props['LIGHT_ON_' + s]);
+  }
+  return { lightOnN: lightOnN, blinkSlots: blinkSlots };
+}
+
+function featureToLight(f) {
+  var props = f.properties;
+  var parsed = parseBlinkSlots(props);
+  return {
+    lngLat: getFeatureCenter(f),
+    color: parseHexColor(props['COLOUR_HEX']),
+    lightOnN: parsed.lightOnN,
+    blinkSlots: parsed.blinkSlots
+  };
+}
+
+function buildVertexData(lights) {
+  var vertices = new Float32Array(lights.length * 6);
+  for (var i = 0; i < lights.length; i++) {
+    var mc = maplibregl.MercatorCoordinate.fromLngLat(lights[i].lngLat);
+    var offset = i * 6;
+    vertices[offset] = mc.x;
+    vertices[offset + 1] = mc.y;
+    vertices[offset + 2] = lights[i].color[0];
+    vertices[offset + 3] = lights[i].color[1];
+    vertices[offset + 4] = lights[i].color[2];
+    vertices[offset + 5] = i;
+  }
+  return vertices;
+}
+
+function writeBlinkTextureRow(textureData, rowIndex, light) {
+  var lightOnN = light.lightOnN || 60;
+  var rowOffset = rowIndex * BLINK_TEXTURE_WIDTH * 4;
+
+  for (var s = 0; s < BLINK_TEXTURE_WIDTH; s++) {
+    var pixelOffset = rowOffset + s * 4;
+    textureData[pixelOffset] = 0;
+    textureData[pixelOffset + 1] = 0;
+    textureData[pixelOffset + 2] = 0;
+    textureData[pixelOffset + 3] = 0;
+
+    if (lightOnN === 60 && s < 60) {
+      textureData[pixelOffset] = light.blinkSlots[s] ? 255 : 0;
+    }
+    if (lightOnN === 120 && s < 120) {
+      textureData[pixelOffset + 1] = light.blinkSlots[s] ? 255 : 0;
+    }
+    if (lightOnN === 240 && s < 240) {
+      textureData[pixelOffset + 2] = light.blinkSlots[s] ? 255 : 0;
+    }
+    if (lightOnN === 480) {
+      textureData[pixelOffset + 3] = light.blinkSlots[s] ? 255 : 0;
+    }
+  }
+}
+
+function buildBlinkTextureData(lights) {
+  var textureData = new Uint8Array(BLINK_TEXTURE_WIDTH * 4 * lights.length);
+  for (var i = 0; i < lights.length; i++) {
+    writeBlinkTextureRow(textureData, i, lights[i]);
+  }
+  return textureData;
+}
+
+function uploadBlinkTexture(gl, texture, textureData, height) {
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texImage2D(
+    gl.TEXTURE_2D, 0, gl.RGBA,
+    BLINK_TEXTURE_WIDTH, height, 0,
+    gl.RGBA, gl.UNSIGNED_BYTE, textureData
+  );
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+}
+
 function createShaderBlinkLayer(mapInstance) {
   var selectedLights = [];
   var needsBufferUpdate = false;
@@ -40,69 +201,9 @@ function createShaderBlinkLayer(mapInstance) {
     renderingMode: '2d',
 
     onAdd: function (map, gl) {
-      var vertexSource = '#version 300 es\n' +
-        'uniform mat4 u_matrix;\n' +
-        'in vec2 a_pos;\n' +
-        'in vec3 a_color;\n' +
-        'in float a_lightIndex;\n' +
-        'out vec3 v_color;\n' +
-        'out float v_lightIndex;\n' +
-        'void main() {\n' +
-        '  gl_Position = u_matrix * vec4(a_pos, 0.0, 1.0);\n' +
-        '  gl_PointSize = 12.0;\n' +
-        '  v_color = a_color;\n' +
-        '  v_lightIndex = a_lightIndex;\n' +
-        '}\n';
-
-      var fragmentSource = '#version 300 es\n' +
-        'precision highp float;\n' +
-        'uniform float u_time;\n' +
-        'uniform sampler2D u_blinkPattern;\n' +
-        'uniform float u_lightCount;\n' +
-        'in vec3 v_color;\n' +
-        'in float v_lightIndex;\n' +
-        'out vec4 fragColor;\n' +
-        'void main() {\n' +
-        '  vec2 center = gl_PointCoord - vec2(0.5);\n' +
-        '  float dist = length(center);\n' +
-        '  if (dist > 0.5) discard;\n' +
-        '  float minuteMs = u_time;\n' +
-        '  float texY = (v_lightIndex + 0.5) / u_lightCount;\n' +
-        '  float slot60 = floor(minuteMs / 1000.0);\n' +
-        '  float slot120 = floor(minuteMs / 500.0);\n' +
-        '  float slot240 = floor(minuteMs / 250.0);\n' +
-        '  float slot480 = floor(minuteMs / 125.0);\n' +
-        '  float texR = texture(u_blinkPattern, vec2((slot60 + 0.5) / ' + BLINK_TEXTURE_WIDTH + '.0, texY)).r;\n' +
-        '  float texG = texture(u_blinkPattern, vec2((slot120 + 0.5) / ' + BLINK_TEXTURE_WIDTH + '.0, texY)).g;\n' +
-        '  float texB = texture(u_blinkPattern, vec2((slot240 + 0.5) / ' + BLINK_TEXTURE_WIDTH + '.0, texY)).b;\n' +
-        '  float texA = texture(u_blinkPattern, vec2((slot480 + 0.5) / ' + BLINK_TEXTURE_WIDTH + '.0, texY)).a;\n' +
-        '  float isOn = max(max(texR, texG), max(texB, texA));\n' +
-        '  if (isOn < 0.5) discard;\n' +
-        '  float edge = smoothstep(0.5, 0.4, dist);\n' +
-        '  fragColor = vec4(v_color * edge, edge);\n' +
-        '}\n';
-
-      var vertexShader = gl.createShader(gl.VERTEX_SHADER);
-      gl.shaderSource(vertexShader, vertexSource);
-      gl.compileShader(vertexShader);
-      if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-        console.error('Vertex shader error:', gl.getShaderInfoLog(vertexShader));
-      }
-
-      var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-      gl.shaderSource(fragmentShader, fragmentSource);
-      gl.compileShader(fragmentShader);
-      if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
-        console.error('Fragment shader error:', gl.getShaderInfoLog(fragmentShader));
-      }
-
-      this.program = gl.createProgram();
-      gl.attachShader(this.program, vertexShader);
-      gl.attachShader(this.program, fragmentShader);
-      gl.linkProgram(this.program);
-      if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
-        console.error('Program link error:', gl.getProgramInfoLog(this.program));
-      }
+      var vertexShader = compileShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER_SOURCE);
+      var fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER_SOURCE);
+      this.program = linkProgram(gl, vertexShader, fragmentShader);
 
       this.aPos = gl.getAttribLocation(this.program, 'a_pos');
       this.aColor = gl.getAttribLocation(this.program, 'a_color');
@@ -178,114 +279,27 @@ function createShaderBlinkLayer(mapInstance) {
 
       this.lightCount = selectedLights.length;
 
-      // 6 floats per light: [mercatorX, mercatorY, r, g, b, lightIndex]
-      var vertices = new Float32Array(selectedLights.length * 6);
-
-      // Flat RGBA pixel array for the blink texture.
-      // Dimensions: BLINK_TEXTURE_WIDTH (480) x selectedLights.length
-      // Each pixel = 4 bytes (R, G, B, A), one channel per timing resolution.
-      var textureData = new Uint8Array(BLINK_TEXTURE_WIDTH * 4 * selectedLights.length);
-
-      for (var i = 0; i < selectedLights.length; i++) {
-        var light = selectedLights[i];
-        var mc = maplibregl.MercatorCoordinate.fromLngLat(light.lngLat);
-        var offset = i * 6;
-        vertices[offset] = mc.x;
-        vertices[offset + 1] = mc.y;
-        vertices[offset + 2] = light.color[0];
-        vertices[offset + 3] = light.color[1];
-        vertices[offset + 4] = light.color[2];
-        vertices[offset + 5] = i;
-
-        // lightOnN determines which RGBA channel and how many slots to fill.
-        // Only the matching channel gets data; the rest stay 0.
-        var lightOnN = light.lightOnN || 60;
-        var rowOffset = i * BLINK_TEXTURE_WIDTH * 4;
-
-        for (var s = 0; s < BLINK_TEXTURE_WIDTH; s++) {
-          var pixelOffset = rowOffset + s * 4;
-          textureData[pixelOffset] = 0;
-          textureData[pixelOffset + 1] = 0;
-          textureData[pixelOffset + 2] = 0;
-          textureData[pixelOffset + 3] = 0;
-
-          if (lightOnN === 60 && s < 60) {
-            textureData[pixelOffset] = light.blinkSlots[s] ? 255 : 0;
-          }
-          if (lightOnN === 120 && s < 120) {
-            textureData[pixelOffset + 1] = light.blinkSlots[s] ? 255 : 0;
-          }
-          if (lightOnN === 240 && s < 240) {
-            textureData[pixelOffset + 2] = light.blinkSlots[s] ? 255 : 0;
-          }
-          if (lightOnN === 480) {
-            textureData[pixelOffset + 3] = light.blinkSlots[s] ? 255 : 0;
-          }
-        }
-      }
-
+      var vertices = buildVertexData(selectedLights);
       gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.DYNAMIC_DRAW);
       this.vertexCount = selectedLights.length;
 
+      var textureData = buildBlinkTextureData(selectedLights);
       var texHeight = Math.max(selectedLights.length, 1);
-      gl.bindTexture(gl.TEXTURE_2D, this.blinkTexture);
-      gl.texImage2D(
-        gl.TEXTURE_2D, 0, gl.RGBA,
-        BLINK_TEXTURE_WIDTH, texHeight, 0,
-        gl.RGBA, gl.UNSIGNED_BYTE, textureData
-      );
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      uploadBlinkTexture(gl, this.blinkTexture, textureData, texHeight);
     }
   };
 
-  function parseHexColor(hex) {
-    if (!hex || hex.length < 7) return [1.0, 1.0, 0.0];
-    var r = parseInt(hex.substring(1, 3), 16) / 255.0;
-    var g = parseInt(hex.substring(3, 5), 16) / 255.0;
-    var b = parseInt(hex.substring(5, 7), 16) / 255.0;
-    return [r, g, b];
-  }
-
-  function getFeatureCenter(f) {
-    if (f.geometry.type === 'Point') {
-      return { lng: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] };
-    }
-    var centroid = turf.centroid(f);
-    return { lng: centroid.geometry.coordinates[0], lat: centroid.geometry.coordinates[1] };
-  }
-
-  /** Converts GeoJSON features (with LIGHT_ON_* properties) into the internal selectedLights array and flags a buffer rebuild. */
   function setSelectedFeatures(features) {
     selectedLights = [];
     var seen = {};
     for (var i = 0; i < features.length; i++) {
       var f = features[i];
-      var props = f.properties;
-      var ufid = props.ufid;
+      var ufid = f.properties.ufid;
       if (ufid && seen[ufid]) continue;
       if (ufid) seen[ufid] = true;
 
-      var lightOnN = props['LIGHT_ON_N'] || 60;
-      var blinkSlots = [];
-      var onCount = 0;
-      for (var s = 0; s < lightOnN; s++) {
-        var isOn = !!props['LIGHT_ON_' + s];
-        blinkSlots.push(isOn);
-        if (isOn) onCount++;
-      }
-
-      var center = getFeatureCenter(f);
-
-      selectedLights.push({
-        lngLat: center,
-        color: parseHexColor(props['COLOUR_HEX']),
-        lightOnN: lightOnN,
-        blinkSlots: blinkSlots
-      });
+      selectedLights.push(featureToLight(f));
     }
     needsBufferUpdate = true;
     if (selectedLights.length > 0) {
