@@ -1,0 +1,4419 @@
+{
+  "version": 8,
+  "name": "Nautisk bakgrunnskart. Branch: main",
+  "sources": {
+    "osm": {
+      "type": "vector",
+      "maxzoom": 14,
+      "tiles": ["https://pmtiles.ecc.no/osmxs57/{z}/{x}/{y}.mvt"]
+    },
+    "placename": {
+      "type": "vector",
+      "maxzoom": 12,
+      "tiles": [
+        "https://pmtiles.ecc.no/placename-v5v/{z}/{x}/{y}.mvt"
+      ],
+      "tilesDev": [
+        "http://127.0.0.1:8085/tile/text/{z}/{x}/{y}.mvt?crs=EPSG:3857&SCALE="
+      ]
+    },
+    "s57": {
+      "type": "vector",
+      "maxzoom": 15,
+      "tiles": [
+        "https://qaprimar.ecc.no/qaprimar/vectortile_apikey/6c18579e-5df8-49bf-865a-de9d33d88315/cells/{z}/{x}/{y}.mvt?crs=EPSG:3857&scale=&excludeTP=false&detailedDepth=true"
+      ],
+      "tilesDev": [
+        "http://127.0.0.1:8080/utvikling/vectortile_apikey/5c2e4e2e-6dc9-44a1-aee4-09c7772f1b69/cells/{z}/{x}/{y}.mvt?crs=EPSG:3857&scale=&excludeTP=false"
+      ]
+    },
+    "sosi": {
+      "type": "vector",
+      "maxzoom": 15,
+      "tiles": [
+        "https://sjokartraster.maplytic.no/tile/_vt/{z}/{x}/{y}.mvt?crs=EPSG:3857&scale="
+      ],
+      "tilesDev": [
+        "http://127.0.0.1:8083/tile/maplytic-repos/sjokartraster.maplytic.no/public/_vt/{z}/{x}/{y}.mvt?crs=EPSG:3857&scale="
+      ]
+    },
+    "fjellskygge2": {
+        "type": "raster",
+        "tiles": [
+            "https://tile.ecc.no/tile/nohillshade/{z}/{x}/{y}.png?api_key=AC17360A-808A-432F-BC71-1D6C3B89A03C&crs=EPSG:3857&scale=&scaleMinimum=4999999"
+        ]
+    },
+    "areaNames": {
+      "type": "geojson",
+      "data": "https://halset.maplytic.no/gds-github-6189/areaNames.geojson?api_key="
+    }
+  },
+  "sprite": "https://nbc.maplytic.no/sprite/sprite",
+  "glyphs": "https://nbc.maplytic.no/glyphs/{fontstack}/{range}.pbf",
+  "glyphsDev": "http://127.0.0.1:8083/glyphs/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "land_osm_land_fill",
+      "type": "fill",
+      "source": "osm",
+      "source-layer": "land",
+      "filter": ["==", "$type", "Polygon"],
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "water_osm_water_fill",
+      "type": "fill",
+      "source": "osm",
+      "source-layer": "water",
+      "filter": ["==", "$type", "Polygon"],
+      "paint": {
+        "fill-color": "#FFFFFF"
+      }
+    },
+    {
+      "id": "land_s57_LNDARE",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "LNDARE",
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "land_s57_ICEARE",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "ICEARE",
+      "paint": {
+        "fill-color": [
+          "case",
+          [">=", ["get", "SCALE"], 5000000],
+          "#fff8c3",
+          "#f4f8ff"
+        ]
+      }
+    },
+    {
+      "id": "land_s57_LAKARE_fill",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "LAKARE",
+      "filter": ["all", ["==", "$type", "Polygon"], ["<", "SCALE", 1000000]],
+      "paint": {
+        "fill-color": "#e7f6fd"
+      }
+    },
+    {
+      "id": "land_s57_LAKARE_outline",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "LAKARE_OUTLINE",
+      "filter": ["<=", "SCALE", 500000],
+      "paint": {
+        "line-color": "rgb(161, 220, 248)",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "land_s57_RIVERS_fill",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "RIVERS",
+      "filter": ["all", ["==", "$type", "Polygon"], ["<", "SCALE", 500000]],
+      "paint": {
+        "fill-color": "#e7f6fd"
+      }
+    },
+    {
+      "id": "land_s57_RIVERS",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "RIVERS",
+      "filter": ["<=", "SCALE", 500000],
+      "paint": {
+        "line-color": "rgb(161, 220, 248)",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "land_s57_BUAARE",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "BUAARE",
+      "paint": {
+        "fill-color": "rgb(238, 214, 172)"
+      }
+    },
+    {
+      "id": "land_s57_ROADWY",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "ROADWY",
+      "paint": {
+        "line-color": "#A8A8A8",
+        "line-width": 2
+      }
+    },
+    {
+      "id": "land_s57_TUNNEL",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "TUNNEL",
+      "paint": {
+        "line-color": "rgba(168, 168, 168, 0.6)",
+        "line-width": 2,
+        "line-dasharray": [2, 2]
+      }
+    },
+    {
+      "id": "land_s57_LNDELV_line",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "LNDELV",
+	  "filter": ["==", "$type", "LineString"],
+      "paint": {
+		  "line-width": [
+            "case",
+            ["==", ["%", ["get", "ELEVAT"], 50], 0],
+            0.3,
+            0.1
+          ],
+		  "line-color": "rgb(200,133,70)"
+      }
+    },
+    {
+      "id": "land_s57_RAILWY",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "RAILWY",
+      "paint": {
+        "line-color": "#5A5A5A",
+        "line-width": 2
+      }
+    },
+    {
+      "id": "land_s57_BUISGL_fill",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "BUISGL",
+      "paint": {
+        "fill-color": "rgb(238, 214, 172)"
+      }
+    },
+    {
+      "id": "land_s57_BUISGL_line",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "BUISGL",
+      "paint": {
+        "line-color": "#A8A8A8",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "land_no_Landareal",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Landareal",
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "land_no_cover_snow",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "SnøIsbre",
+      "paint": {
+        "fill-color": [
+          "case",
+          [">=", ["get", "scale"], 5000000],
+          "#fff8c3",
+          "#f4f8ff"
+        ]
+      }
+    },
+    {
+      "id": "land_no_cover_scrub",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "ÅpentOmråde",
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "land_no_cover_wood",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Skog",
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "land_no_cover_golfbane",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Golfbane",
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "land_no_cover_Alpinbakke",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Alpinbakke",
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "land_no_use_cemetery",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Gravplass",
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "land_no_use_steinbrudd",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Steinbrudd",
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "land_no_use_Steintipp",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Steintipp",
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "land_no_use_sport_idrett_plass",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "SportIdrettPlass",
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "land_no_use_dyrket_mark",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "DyrketMark",
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "land_no_use_Park",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Park",
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "land_no_use_tett_bebyggelse",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Tettbebyggelse",
+      "paint": {
+        "fill-color": "#FDDFAF"
+      }
+    },
+    {
+      "id": "land_no_use_bymessig_bebyggelse",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "BymessigBebyggelse",
+      "paint": {
+        "fill-color": "rgb(248,198,119)"
+      }
+    },
+    {
+      "id": "land_no_use_industriomrade",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Industriområde",
+      "paint": {
+        "fill-color": "rgb(248,198,119)"
+      }
+    },
+    {
+      "id": "land_no_use_Lufthavn",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Lufthavn",
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "land_no_use_Rullebane",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Rullebane",
+      "paint": {
+        "fill-color": "#C9C9C9"
+      }
+    },
+    {
+      "id": "land_no_use_Tank",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Tank",
+      "paint": {
+        "fill-color": "#A8A8A8"
+      }
+    },
+    {
+      "id": "land_no_use_myr",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Myr",
+      "paint": {
+        "fill-color": "rgb(255, 248, 195)"
+      }
+    },
+    {
+      "id": "water_1_havflate",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Havflate",
+      "paint": {
+        "fill-color": "#ffffff"
+      }
+    },
+    {
+        "id": "land_no_fjellskygge2000",
+        "type": "raster",
+        "source": "fjellskygge2",
+        "raster-opacity": 0.8
+    },
+    {
+      "id": "land_no_Innsjø-fill",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Innsjø",
+      "filter": ["all", ["==", "$type", "Polygon"], ["<", "scale", 1000000]],
+      "paint": {
+        "fill-color": "#e7f6fd"
+      }
+    },
+    {
+      "id": "land_no_Innsjø-fill-zoomed-out",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Innsjø",
+      "filter": ["all", ["==", "$type", "Polygon"], [">=", "scale", 1000000]],
+      "paint": {
+        "fill-color": [
+          "case",
+          [">=", ["get", "scale"], 5000000],
+          "#fff8c3",
+          "#faf7d9"
+        ]
+      }
+    },
+    {
+      "id": "land_no_Innsjø-line",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Innsjø",
+      "filter": ["<=", "scale", 500000],
+      "paint": {
+        "line-color": "rgb(161, 220, 248)",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "land_no_InnsjøRegulert-fill",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "InnsjøRegulert",
+      "filter": ["all", ["==", "$type", "Polygon"], ["<", "scale", 1000000]],
+      "paint": {
+        "fill-color": "#e7f6fd"
+      }
+    },
+    {
+      "id": "land_no_InnsjøRegulert-line",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "InnsjøRegulert",
+      "filter": ["<", "scale", 1000000],
+      "paint": {
+        "line-color": "rgb(161, 220, 248)",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "land_no_Elv-fill",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Elv",
+      "filter": ["all", ["==", "$type", "Polygon"], ["<", "scale", 1000000]],
+      "paint": {
+        "fill-color": "#e7f6fd"
+      }
+    },
+    {
+      "id": "land_no_ElvBekk-fill",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "ElvBekk",
+      "filter": ["all", ["==", "$type", "Polygon"], ["<", "scale", 1000000]],
+      "paint": {
+        "fill-color": "#e7f6fd"
+      }
+    },
+    {
+      "id": "land_no_ElveKant",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "ElveKant",
+      "filter": ["<", "scale", 1000000],
+      "paint": {
+        "line-color": "rgb(161, 220, 248)",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "land_no_ElvBekkKant",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "ElvBekkKant",
+      "filter": ["<", "scale", 1000000],
+      "paint": {
+        "line-color": "rgb(161, 220, 248)",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "land_no_ElvBekk-line",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "ElvBekk",
+      "filter": ["all", ["==", "$type", "LineString"], ["<", "scale", 500000]],
+      "paint": {
+        "line-color": "rgb(161, 220, 248)",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "land_no_FerskvannTørrfall",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "FerskvannTørrfall",
+      "filter": ["all", ["==", "$type", "Polygon"], ["<", "scale", 1000000]],
+      "paint": {
+        "fill-color": "rgb(161, 220, 248)"
+      }
+    },
+    {
+      "id": "land_no_FerskvannTørrfallkant",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "FerskvannTørrfallkant",
+      "filter": ["<", "scale", 1000000],
+      "paint": {
+        "line-color": "rgb(161, 220, 248)",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "water_1_dybdelag_s57",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "DEPARE",
+      "filter": [
+        "all",
+        [">=", "DRVAL1", 0],
+        ["<=", "DRVAL2", 5],
+        ["<", "SCALE", 5000000]
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          ["to-number", ["get", "DRVAL1"]],
+          "#afddfa",
+          5,
+          "#c8e7fa",
+          10,
+          "#FFFFFF"
+        ]
+      }
+    },
+    {
+      "id": "water_2_dybdelag_s57",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "DEPARE",
+      "filter": [
+        "all",
+        [">=", "DRVAL1", 0],
+        [">", "DRVAL2", 5],
+        ["<", "SCALE", 5000000]
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          ["to-number", ["get", "DRVAL1"]],
+          "#afddfa",
+          5,
+          "#c8e7fa",
+          10,
+          "#FFFFFF"
+        ]
+      }
+    },
+    {
+      "id": "water_too_wide_range_ZoomOut",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "DEPARE",
+      "filter": [
+        "all",
+        ["<=", "DRVAL1", 0.5],
+        [">=", "DRVAL2", 200],
+        [">=", "SCALE", 5000000]
+      ],
+      "paint": {
+        "fill-color": "#FFFFFF"
+      }
+    },
+    {
+      "id": "water_1_dybdelag_s57_ZoomOut",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "DEPARE",
+      "filter": [
+        "all",
+        [">=", "DRVAL1", 0],
+        [">", "DRVAL2", 5],
+        [">=", "SCALE", 5000000],
+        ["none", ["all", ["<=", "DRVAL1", 0.5], [">=", "DRVAL2", 200]]]
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          ["to-number", ["get", "DRVAL1"]],
+          "#afddfa",
+          5,
+          "#c8e7fa",
+          10,
+          "#FFFFFF"
+        ]
+      }
+    },
+    {
+      "id": "water_2_dybdelag_s57_ZoomOut",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "DEPARE",
+      "filter": [
+        "all",
+        [">=", "DRVAL1", 0],
+        [">", "DRVAL2", 5],
+        [">=", "SCALE", 5000000],
+        ["none", ["all", ["<=", "DRVAL1", 0.5], [">=", "DRVAL2", 200]]]
+      ],
+      "paint": {
+        "fill-color": [
+          "step",
+          ["to-number", ["get", "DRVAL1"]],
+          "#afddfa",
+          5,
+          "#c8e7fa",
+          10,
+          "#FFFFFF"
+        ]
+      }
+    },
+    {
+      "id": "water_1_torrfall",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "DEPARE",
+      "filter": ["<", "DRVAL1", 0],
+      "paint": {
+        "fill-color": "#9fd19f"
+      }
+    },
+    {
+      "id": "land_BRIDGE-fill",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "BRIDGE",
+      "filter": ["all", ["!has", "VERCLR"], ["==", "$type", "Polygon"]],
+      "paint": {
+        "fill-color": "rgba(70, 70, 70, 0.2)"
+      }
+    },
+    {
+      "id": "land_BRIDGE-outline",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "BRIDGE",
+      "filter": ["!has", "VERCLR"],
+      "paint": {
+        "line-color": "rgb(70, 70, 70)",
+        "line-width": 2
+      }
+    },
+    {
+      "id": "BRIDGE-fill",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "BRIDGE",
+      "filter": ["all", ["has", "VERCLR"], ["==", "$type", "Polygon"]],
+      "paint": {
+        "fill-color": "rgba(70, 70, 70, 0.2)"
+      }
+    },
+    {
+      "id": "BRIDGE-outline",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "BRIDGE",
+      "filter": ["has", "VERCLR"],
+      "paint": {
+        "line-color": "rgb(70, 70, 70)",
+        "line-width": 2
+      }
+    },
+    {
+      "id": "OFSPLF-line",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "OFSPLF",
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-color": "#000000",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "OFSPLF-area-fill",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "OFSPLF",
+      "filter": ["==", "$type", "Polygon"],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "fill-color": "rgb(150,90,8)",
+        "fill-opacity": 0.6
+      }
+    },
+    {
+      "id": "OBSTRN-area-fill",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "OBSTRN",
+      "filter": ["==", "$type", "Polygon"],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "fill-color": "#666",
+        "fill-opacity": 0.2
+      }
+    },
+    {
+      "id": "OBSTRN-area-line",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "OBSTRN",
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "line-color": "#000000",
+        "line-width": 1,
+        "line-dasharray": [4, 2]
+      }
+    },
+    {
+      "id": "land_no_JernbaneT",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Bane",
+      "filter": ["all", ["==", "MEDIUM", "T"], ["<", "scale", 500000]],
+      "paint": {
+        "line-width": 2,
+        "line-color": "#5A5A5A"
+      }
+    },
+    {
+      "id": "land_no_JernbaneU",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Bane",
+      "filter": ["all", ["==", "MEDIUM", "U"], ["<", "scale", 500000]],
+      "paint": {
+        "line-width": 2,
+        "line-color": "#5A5A5A",
+        "line-dasharray": [2, 2]
+      }
+    },
+    {
+      "id": "land_no_Bygning",
+      "type": "fill",
+      "source": "sosi",
+      "source-layer": "Bygning",
+      "paint": {
+        "fill-color": "#A8A8A8"
+      }
+    },
+    {
+      "id": "land_no_Flomløpkant",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Flomløpkant",
+      "paint": {
+        "line-width": 1,
+        "line-color": "rgb(161, 220, 248)"
+      }
+    },
+    {
+      "id": "DEPCNT",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "DEPCNT",
+      "filter": [
+        "any",
+        ["<", "SCALE", 1000000],
+        ["in", "VALDCO", 100, 200, 300, 500]
+      ],
+      "paint": {
+        "line-width": 0.5,
+        "line-color": "#93aebb"
+      }
+    },
+    {
+      "id": "MudretOmrade",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "DRGARE",
+      "paint": {
+        "fill-color": [
+          "interpolate",
+          ["linear"],
+          ["to-number", ["get", "DRVAL1"]],
+          0.5,
+          "#8cc7ed",
+          5,
+          "#cce9f2",
+          10,
+          "#e7f6fd",
+          2000,
+          "#e7f6fd"
+        ]
+      }
+    },
+    {
+      "id": "PONTON-fill",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "PONTON",
+      "filter": ["==", "$type", "Polygon"],
+      "paint": {
+        "fill-color": "#fefada"
+      }
+    },
+    {
+      "id": "PONTON-line",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "PONTON",
+      "paint": {
+        "line-width": 1,
+        "line-color": "#57656b"
+      }
+    },
+    {
+      "id": "Flytedokk_fill",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "FLODOC",
+      "filter": ["==", "$type", "Polygon"],
+      "paint": {
+        "fill-color": "#57656b"
+      }
+    },
+    {
+      "id": "flytedokk_grense",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "FLODOC",
+      "paint": {
+        "line-width": 1,
+        "line-color": "#57656b"
+      }
+    },
+    {
+      "id": "TSSRON",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "TSSRON",
+      "filter": ["<", "SCALE", 5000000],
+      "paint": {
+        "fill-color": "#ad5cd1",
+        "fill-opacity": 0.05
+      }
+    },
+    {
+      "id": "TSEZNE",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "TSEZNE",
+      "filter": ["<", "SCALE", 5000000],
+      "paint": {
+        "fill-color": "#ad5cd1",
+        "fill-opacity": 0.1
+      }
+    },
+    {
+      "id": "TSELNE",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "TSELNE",
+      "filter": ["<", "SCALE", 5000000],
+      "paint": {
+        "line-color": "#ad5cd1",
+        "line-width": [
+          "interpolate",
+          ["linear"],
+          ["get", "SCALE"],
+          10000,
+          10,
+          50000,
+          7,
+          1000000,
+          2.5
+        ],
+        "line-opacity": 0.3
+      }
+    },
+    {
+      "id": "TSSBND",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "TSSBND",
+      "filter": ["<", "SCALE", 5000000],
+      "paint": {
+        "line-color": "#ad5cd1",
+        "line-width": 4,
+        "line-opacity": 0.2,
+        "line-dasharray": [4, 1]
+      }
+    },
+    {
+      "id": "RCRTCL",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "RCRTCL",
+      "filter": ["<", "SCALE", 5000000],
+      "paint": {
+        "line-color": "#ad5cd1",
+        "line-width": 1,
+        "line-opacity": 1,
+        "line-dasharray": [4, 4]
+      }
+    },
+    {
+      "id": "DRYDOC_line",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "DRYDOC",
+      "filter": ["in", "$type", "LineString", "Polygon"],
+      "paint": {
+        "line-width": 1,
+        "line-color": "#57656b"
+      }
+    },
+    {
+      "id": "LNDARE_point",
+      "type": "circle",
+      "source": "s57",
+      "source-layer": "LNDARE",
+      "filter": ["all", ["==", "$type", "Point"], ["<", "SCALE", 5000000]],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "circle-radius": [
+          "interpolate",
+          ["linear"],
+          ["get", "SCALE"],
+          100000,
+          2,
+          150000,
+          1.5,
+          250000,
+          1
+        ],
+        "circle-color": [
+          "case",
+          ["<=", ["get", "SCALE"], 200000],
+          "#ffefc6",
+          "#57656b"
+        ],
+        "circle-stroke-color": "#57656b",
+        "circle-stroke-width": 1
+      }
+    },
+    {
+      "id": "land_COALNE",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "COALNE",
+      "paint": {
+        "line-width": 1,
+        "line-color": "#57656b"
+      }
+    },
+    {
+      "id": "land_no_Høydekurve-detailed",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Høydekurve",
+      "filter": ["<=", "scale", 100000],
+      "paint": {
+        "line-width": [
+          "case",
+          ["==", ["%", ["get", "HØYDE"], 50], 0],
+          0.3,
+          0.1
+        ],
+        "line-color": [
+          "case",
+          ["==", ["get", "MEDIUM"], "I"],
+          "rgb(91,188,246)",
+          "rgb(200,133,70)"
+        ]
+      }
+    },
+    {
+      "id": "land_no_Høydekurve-overview",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Høydekurve",
+      "filter": ["all", [">", "scale", 100000], ["<", "scale", 1000000]],
+      "paint": {
+        "line-width": [
+          "case",
+          ["==", ["%", ["get", "HØYDE"], 500], 0],
+          0.9,
+          0.5
+        ],
+        "line-color": [
+          "case",
+          ["==", ["get", "MEDIUM"], "I"],
+          "rgb(91,188,246)",
+          "rgb(200,133,70)"
+        ]
+      }
+    },
+    {
+      "id": "land_no_Terrengpunkt",
+      "type": "circle",
+      "source": "sosi",
+      "source-layer": "Terrengpunkt",
+      "filter": ["<", "scale", 100000],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "circle-radius": 2,
+        "circle-color": "#351b03"
+      }
+    },
+    {
+      "id": "land_no_Terrengpunkt_label",
+      "type": "symbol",
+      "source": "sosi",
+      "source-layer": "Terrengpunkt",
+      "filter": ["<", "scale", 100000],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["Raleway-Regular"],
+        "text-size": 10,
+        "text-field": "{HØYDE}",
+        "text-anchor": "top",
+        "text-allow-overlap": true,
+        "text-offset": [0, 0.3]
+      },
+      "paint": {
+        "text-color": "#351b03"
+      }
+    },
+    {
+      "id": "land_no_TrigonometriskPunkt",
+      "type": "circle",
+      "source": "sosi",
+      "source-layer": "TrigonometriskPunkt",
+      "filter": ["<", "scale", 500000],
+      "layout": {
+        "visibility": "visible"
+      },
+      "paint": {
+        "circle-radius": 2,
+        "circle-color": "#351b03"
+      }
+    },
+    {
+      "id": "land_no_TrigonometriskPunkt_label",
+      "type": "symbol",
+      "source": "sosi",
+      "source-layer": "TrigonometriskPunkt",
+      "filter": ["<", "scale", 500000],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["Raleway-Regular"],
+        "text-size": 10,
+        "text-field": "{HØYDE}",
+        "text-anchor": "top",
+        "text-offset": [0, 0.3],
+        "text-allow-overlap": true
+      },
+      "paint": {
+        "text-color": "#351b03"
+      }
+    },
+    {
+      "id": "land_no_Dam",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Dam",
+      "paint": {
+        "line-width": 1,
+        "line-color": "rgba(1,1,1,1)"
+      }
+    },
+    {
+      "id": "land_no_Tårn",
+      "type": "symbol",
+      "source": "sosi",
+      "source-layer": "Tårn",
+      "layout": {
+        "visibility": "visible",
+        "icon-image": "TOWERS03",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "land_no_Veglenke_TraktorvegSti",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Veglenke",
+      "filter": [
+        "all",
+        ["==", "TYPEVEG", "sti"],
+        ["==", "MEDIUM", "T"],
+        ["<", "scale", 500000]
+      ],
+      "paint": {
+        "line-color": "#A8A8A8",
+        "line-width": 1,
+        "line-opacity": 0.7,
+        "line-dasharray": [2, 2]
+      }
+    },
+    {
+      "id": "land_no_Veglenke_Europaveg",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Veglenke",
+      "filter": [
+        "all",
+        ["==", "TYPEVEG", "enkelBilveg"],
+        ["!=", "MEDIUM", "U"],
+        ["any", ["in", "vegkategori", "E"], ["has", "MOTORVEGTYPE"]],
+        ["<", "scale", 1000000]
+      ],
+      "paint": {
+        "line-color": "#A8A8A8",
+        "line-opacity": 0.7,
+        "line-width": 2
+      }
+    },
+    {
+      "id": "land_no_Veglenke_Stor",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Veglenke",
+      "filter": [
+        "all",
+        ["==", "TYPEVEG", "enkelBilveg"],
+        ["!=", "MEDIUM", "U"],
+        ["any", ["in", "vegkategori", "R", "F"], ["has", "MOTORVEGTYPE"]],
+        ["<", "scale", 500000]
+      ],
+      "paint": {
+        "line-color": "#A8A8A8",
+        "line-opacity": 0.7,
+        "line-width": 2
+      }
+    },
+    {
+      "id": "land_no_Veglenke_Europaveg_Tunnel",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Veglenke",
+      "filter": [
+        "all",
+        ["==", "TYPEVEG", "enkelBilveg"],
+        ["==", "MEDIUM", "U"],
+        ["any", ["in", "vegkategori", "E"], ["has", "MOTORVEGTYPE"]],
+        ["<", "scale", 1000000]
+      ],
+      "paint": {
+        "line-color": "rgba(168, 168, 168, 0.6)",
+        "line-width": 2,
+        "line-opacity": 0.7,
+        "line-dasharray": [2, 2]
+      }
+    },
+    {
+      "id": "land_no_Veglenke_Stor_Tunnel",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Veglenke",
+      "filter": [
+        "all",
+        ["==", "TYPEVEG", "enkelBilveg"],
+        ["==", "MEDIUM", "U"],
+        ["any", ["in", "vegkategori", "R", "F"], ["has", "MOTORVEGTYPE"]],
+        ["<", "scale", 500000]
+      ],
+      "paint": {
+        "line-color": "rgba(168, 168, 168, 0.6)",
+        "line-width": 2,
+        "line-opacity": 0.7,
+        "line-dasharray": [2, 2]
+      }
+    },
+    {
+      "id": "land_no_Veglenke_Mellom",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Veglenke",
+      "filter": [
+        "all",
+        ["==", "TYPEVEG", "enkelBilveg"],
+        ["!=", "MEDIUM", "U"],
+        ["!in", "vegkategori", "R", "E", "F", "P"],
+        ["!has", "MOTORVEGTYPE"],
+        ["<", "scale", 500000]
+      ],
+      "paint": {
+        "line-color": "#A8A8A8",
+        "line-opacity": 0.7,
+        "line-width": 1
+      }
+    },
+    {
+      "id": "land_no_Veglenke_Mellom_Tunnel",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Veglenke",
+      "filter": [
+        "all",
+        ["==", "TYPEVEG", "enkelBilveg"],
+        ["==", "MEDIUM", "U"],
+        ["!in", "vegkategori", "R", "E", "F", "P"],
+        ["!has", "MOTORVEGTYPE"],
+        ["<", "scale", 500000]
+      ],
+      "paint": {
+        "line-color": "rgba(168, 168, 168, 0.6)",
+        "line-width": 1,
+        "line-opacity": 0.7,
+        "line-dasharray": [2, 2]
+      }
+    },
+    {
+      "id": "land_no_Veglenke_Liten",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Veglenke",
+      "filter": [
+        "all",
+        ["==", "TYPEVEG", "enkelBilveg"],
+        ["!=", "MEDIUM", "U"],
+        ["in", "vegkategori", "P"],
+        ["<", "scale", 500000]
+      ],
+      "paint": {
+        "line-color": "#A8A8A8",
+        "line-opacity": 0.7,
+        "line-width": 1
+      }
+    },
+    {
+      "id": "land_no_Veglenke_Liten_Tunnel",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Veglenke",
+      "filter": [
+        "all",
+        ["==", "TYPEVEG", "enkelBilveg"],
+        ["==", "MEDIUM", "U"],
+        ["in", "vegkategori", "P"],
+        ["<", "scale", 500000]
+      ],
+      "paint": {
+        "line-color": "rgba(168, 168, 168, 0.6)",
+        "line-width": 1,
+        "line-opacity": 0.7,
+        "line-dasharray": [2, 2]
+      }
+    },
+    {
+      "id": "land_no_Mast",
+      "type": "symbol",
+      "source": "sosi",
+      "source-layer": "MastTele",
+      "layout": {
+        "icon-image": "Mast",
+        "icon-allow-overlap": true,
+        "icon-size": 0.15
+      }
+    },
+    {
+      "id": "land_LNDMRK_mast",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LNDMRK",
+      "filter": [
+        "all",
+        ["==", "$type", "Point"],
+        [
+          "any",
+          ["has", "CATLMK_7"],
+          ["has", "CATLMK_17"],
+          ["has", "CATLMK_3"],
+          ["has", "CATLMK_5"],
+          ["has", "CATLMK_6"],
+          ["has", "CATLMK_9"],
+          ["has", "CATLMK_11"],
+          ["has", "CATLMK_16"],
+          ["has", "CATLMK_21"],
+          ["has", "CATLMK_4"]
+        ]
+      ],
+      "layout": {
+        "icon-image": "mstcon50_mast",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "land_LNDMRK_dome",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LNDMRK",
+      "filter": [
+        "all",
+        ["==", "$type", "Point"],
+        ["any", ["has", "CATLMK_15"], ["has", "CATLMK_20"]]
+      ],
+      "layout": {
+        "icon-image": "E10_Church",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "land_LNDMRK_lights",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LNDMRK",
+      "filter": ["all", ["==", "$type", "Point"], ["has", "CATLMK_10"]],
+      "layout": {
+        "icon-image": "lights109",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "land_LNDMRK_windmill",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LNDMRK",
+      "filter": ["all", ["==", "$type", "Point"], ["has", "CATLMK_18"]],
+      "layout": {
+        "icon-image": "E25_Windmill",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "land_LNDMRK_windmotor",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LNDMRK",
+      "filter": ["all", ["==", "$type", "Point"], ["has", "CATLMK_19"]],
+      "layout": {
+        "icon-image": "E26_1_Wind_turbine",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "land_LNDMRK_baake",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LNDMRK",
+      "filter": [
+        "all",
+        ["==", "$type", "Point"],
+        ["any", ["has", "CATLMK_1"], ["has", "CATLMK_13"], ["has", "CATLMK_14"]]
+      ],
+      "layout": {
+        "icon-image": "Baake",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "Racon_RDOSTA",
+      "type": "circle",
+      "source": "s57",
+      "source-layer": "RDOSTA",
+      "paint": {
+        "circle-radius": 30,
+        "circle-opacity": 0,
+        "circle-stroke-color": "#ec008c",
+        "circle-stroke-width": 3
+      }
+    },
+    {
+      "id": "Racon_RTPBCN",
+      "type": "circle",
+      "source": "s57",
+      "source-layer": "RTPBCN",
+      "paint": {
+        "circle-radius": 30,
+        "circle-opacity": 0,
+        "circle-stroke-color": "#ec008c",
+        "circle-stroke-width": 3
+      }
+    },
+    {
+      "id": "Racon_2",
+      "type": "circle",
+      "source": "s57",
+      "source-layer": "RDOSTA",
+      "paint": {
+        "circle-radius": 10,
+        "circle-stroke-color": "#000000",
+        "circle-opacity": 0,
+        "circle-stroke-width": 1
+      }
+    },
+    {
+      "id": "Racon_3",
+      "type": "circle",
+      "source": "s57",
+      "source-layer": "RDOSTA",
+      "paint": {
+        "circle-radius": 0.5,
+        "circle-stroke-color": "#000000",
+        "circle-opacity": 0,
+        "circle-stroke-width": 1
+      }
+    },
+    {
+      "id": "land_MudretOmrade_Grense",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "DRGARE",
+      "paint": {
+        "line-width": 1,
+        "line-color": "rgba(190,190,190,1)",
+        "line-dasharray": [5, 5]
+      }
+    },
+    {
+      "id": "SLCONS",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "SLCONS",
+      "paint": {
+        "line-color": "#555",
+        "line-width": 2,
+        "line-opacity": 1
+      }
+    },
+    {
+      "id": "BRIDGE_label",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "BRIDGE",
+      "filter": ["all", ["<", "SCALE", 250000]],
+      "layout": {
+        "text-font": ["Raleway-Regular"],
+        "text-size": 16,
+        "text-field": "{VERCLR}",
+        "text-anchor": "bottom",
+        "text-allow-overlap": true
+      },
+      "paint": {
+        "text-color": "#ec008c"
+      }
+    },
+    {
+      "id": "Luftspenn",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "CBLOHD",
+      "filter": ["all", ["<", "SCALE", 250000]],
+      "paint": {
+        "line-color": "rgb(237, 86, 250)",
+        "line-opacity": 0.7,
+        "line-dasharray": [4, 3],
+        "line-width": 1
+      }
+    },
+    {
+      "id": "DEPCNT_VALDCO",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "DEPCNT",
+      "filter": [
+        "any",
+        ["<", "SCALE", 1000000],
+        ["in", "VALDCO", 100, 200, 300, 500]
+      ],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["WorkSans-Italic"],
+        "text-field": "{VALDCO_TXT}",
+        "text-max-angle": 30,
+        "symbol-placement": "line",
+        "symbol-spacing": 150,
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+        "text-size": 9
+      },
+      "paint": {
+        "text-color": "#93aebb",
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "Luftspenn_label",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "CBLOHD",
+      "filter": ["all", ["<", "SCALE", 250000]],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["Raleway-Regular"],
+        "text-size": 16,
+        "text-field": "{VERCSA}",
+        "text-anchor": "bottom"
+      },
+      "paint": {
+        "text-color": "#ec008c"
+      }
+    },
+    {
+      "id": "GATCON",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "GATCON",
+      "paint": {
+        "line-color": "#000000",
+        "line-width": 2,
+        "line-opacity": 0.7
+      }
+    },
+    {
+      "id": "GATCON-arrow",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "GATCON",
+      "layout": {
+        "icon-image": "GATCON03",
+        "icon-size": 1.4
+      }
+    },
+    {
+      "id": "Cable",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "CBLSUB",
+      "paint": {
+        "line-color": "#E655D8",
+        "line-width": 1.5,
+        "line-opacity": 0.7,
+        "line-dasharray": [4, 3]
+      }
+    },
+    {
+      "id": "Cable_submarine",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "CBLSUB_LINE_POINT",
+
+      "layout": {
+        "icon-image": "CBLARE51",
+        "icon-size": 0.4,
+        "icon-allow-overlap": false,
+        "icon-rotate": {
+          "property": "ROTATE_CRS",
+          "type": "identity"
+        },
+        "icon-keep-upright": true,
+        "icon-rotation-alignment": "map"
+      },
+      "filter": ["!in", "CATCBL", 2, 6]
+    },
+    {
+      "id": "Cable_6",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "CBLSUB",
+      "layout": {
+        "line-cap": "round"
+      },
+      "filter": ["==", "CATCBL", 6],
+      "paint": {
+        "line-color": "#ec008c",
+        "line-dasharray": [2, 2],
+        "line-width": 1,
+        "line-blur": 1
+      }
+    },
+    {
+      "id": "mooring_cable",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "CBLSUB_LINE_POINT",
+      "filter": ["==", "CATCBL", 6],
+      "layout": {
+        "icon-image": "ACHARE02",
+        "icon-allow-overlap": true,
+        "icon-rotate": {
+          "property": "ROTATE_CRS",
+          "type": "identity"
+        },
+        "icon-keep-upright": true,
+        "icon-rotation-alignment": "map"
+      }
+    },
+    {
+      "id": "ACHARE_OUTLINE",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "ACHARE_OUTLINE",
+      "filter": ["<=", "SCALE", 500000],
+      "paint": {
+        "line-color": "#ec008c",
+        "line-dasharray": [2, 2],
+        "line-width": 1,
+        "line-blur": 0.5
+      }
+    },
+    {
+      "id": "ACHARE_CENTER",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "ACHARE_CENTER",
+      "filter": ["<=", "SCALE", 500000],
+      "layout": {
+        "icon-image": "N10_Reported_anchorage_area",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "ACHARE_POINT_TEXT",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "ACHARE",
+      "filter": ["all", ["==", "$type", "Point"], ["<=", "SCALE", 500000]],
+      "layout": {
+        "text-font": ["Raleway-Italic"],
+        "text-field": "{OBJNAM}",
+        "text-allow-overlap": true,
+        "text-size": 10,
+        "text-offset": [0, 2]
+      }
+    },
+    {
+      "id": "ACHARE_POINT",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "ACHARE",
+      "filter": ["all", ["==", "$type", "Point"], ["<=", "SCALE", 500000]],
+      "layout": {
+        "icon-image": "N10_Reported_anchorage_point",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "SPLARE",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "SPLARE",
+      "paint": {
+        "line-color": "#ec008c",
+        "line-width": 2,
+        "line-dasharray": [4, 3]
+      }
+    },
+    {
+      "id": "SPLARE_SYMBOL",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "SPLARE_CENTER",
+      "layout": {
+        "icon-image": "splareSymbol",
+        "icon-allow-overlap": true,
+        "icon-size": [
+          "interpolate",
+          ["linear"],
+          ["get", "SCALE"],
+          12500,
+          0.9,
+          25000,
+          0.7,
+          50000,
+          0.6
+        ]
+      }
+    },
+    {
+      "id": "Grenser_fiskeri",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "FSHZNE",
+      "paint": {
+        "line-color": "#ec008c",
+        "line-dasharray": [4, 4],
+        "line-width": 1
+      }
+    },
+    {
+      "id": "NAVLNE",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "NAVLNE",
+      "filter": ["<", "SCALE", 100000],
+      "paint": {
+        "line-color": "#000",
+        "line-dasharray": [6, 3],
+        "line-opacity": 0.6,
+        "line-width": 1
+      }
+    },
+    {
+      "id": "NAVLNE_text",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "NAVLNE",
+      "filter": ["<", "SCALE", 100000],
+      "layout": {
+        "symbol-placement": "line",
+        "text-font": ["WorkSans-Regular"],
+        "text-field": "{norwegianPaperChartLabel}",
+        "text-anchor": "bottom",
+        "text-allow-overlap": true,
+        "text-size": 12
+      },
+      "paint": {
+        "text-color": "#000"
+      }
+    },
+    {
+      "id": "Grenser_fiskeri_info",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "FSHZNE",
+      "layout": {
+        "symbol-placement": "line",
+        "visibility": "visible",
+        "text-font": ["WorkSans-Bold"],
+        "text-field": "{INFORM}",
+        "text-size": 15
+      },
+      "paint": {
+        "text-color": "#ec008c"
+      }
+    },
+    {
+      "id": "recommended_track",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "RECTRC",
+      "paint": {
+        "line-color": "#808080",
+        "line-dasharray": [4, 4],
+        "line-width": 1
+      }
+    },
+    {
+      "id": "Grenser_territorial",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "STSLNE",
+      "filter": ["!=", "NATION", "NO"],
+      "paint": {
+        "line-color": "#ec008c",
+        "line-dasharray": [4, 4],
+        "line-width": 1
+      }
+    },
+    {
+      "id": "TESARE",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "TESARE",
+      "filter": ["!=", "NATION", "NO"],
+      "paint": {
+        "line-color": "#ec008c",
+        "line-dasharray": [4, 4],
+        "line-width": 2
+      }
+    },
+    {
+      "id": "CBLARE",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "CBLARE",
+      "paint": {
+        "line-color": "#ec008c",
+        "line-dasharray": [4, 4],
+        "line-width": 1
+      }
+    },
+    {
+      "id": "WRECKS",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "WRECKS",
+      "paint": {
+        "line-color": "#000000",
+        "line-dasharray": [3, 1],
+        "line-width": 1
+      }
+    },
+    {
+      "id": "RESARE-outline",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "RESARE_NOLAND_OUTLINE",
+      "filter": ["all", ["!has", "SPEED_LIMIT_KN"], ["<", "SCALE", 250000]],
+      "paint": {
+        "line-color": [
+          "case",
+          ["==", ["get", "CATREA_27"], true],
+          "#13aa0b",
+          "#ec008c"
+        ],
+        "line-dasharray": [4, 4],
+        "line-width": 2
+      }
+    },
+    {
+      "id": "unsurveyed_line",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "UNSARE",
+      "filter": ["<", "SCALE", 5000000],
+      "paint": {
+        "line-color": "#ec008c",
+        "line-dasharray": [6, 4],
+        "line-width": 2
+      }
+    },
+    {
+      "id": "unsurveyed_txt",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "UNSARE_CENTER",
+      "filter": ["<", "SCALE", 5000000],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["WorkSans-Italic"],
+        "text-field": "Unsurveyed",
+        "text-allow-overlap": false,
+        "text-size": 15,
+        "text-variable-anchor": ["top-right"],
+        "text-padding": 10
+      },
+      "paint": {
+        "text-color": "#ec008c"
+      }
+    },
+    {
+      "id": "Currents",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "CURENT",
+      "paint": {
+        "line-color": "#ff0000",
+        "line-width": 50
+      }
+    },
+    {
+      "id": "Ferry",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "FERYRT",
+      "paint": {
+        "line-color": "rgb(179, 92, 204)",
+        "line-dasharray": [3, 1],
+        "line-width": 1
+      }
+    },
+    {
+      "id": "Ferry-symbol",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "FERYRT_LINE_POINT",
+      "layout": {
+        "icon-image": "EMFEYRT1",
+        "icon-allow-overlap": false,
+        "icon-rotate": {
+          "property": "ROTATE_CRS",
+          "type": "identity"
+        },
+        "icon-rotation-alignment": "map"
+      }
+    },
+    {
+      "id": "PIPSOL-symbol",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "PIPSOL_LINE_POINT",
+      "layout": {
+        "icon-image": "EMPIPAR1",
+        "icon-size": 0.75,
+        "icon-allow-overlap": true,
+        "icon-rotate": {
+          "property": "ROTATE_CRS",
+          "type": "identity"
+        },
+        "icon-rotation-alignment": "map"
+      }
+    },
+    {
+      "id": "LIGHTS_SECTOR_CENTER",
+      "type": "circle",
+      "source": "s57",
+      "source-layer": "LIGHTS",
+      "filter": false,
+      "paint": {
+          "circle-color": {
+            "property": "COLOUR_HEX",
+            "type": "identity"
+          },
+          "circle-radius": 6
+      }
+    },
+    {
+      "id": "LIGHTS_SECTOR_CENTER_LONG_VALNMR",
+      "type": "circle",
+      "source": "s57",
+      "source-layer": "LIGHTS",
+      "filter": false,
+      "paint": {
+        "circle-color": {
+          "property": "COLOUR_HEX",
+          "type": "identity"
+        },
+        "circle-radius": 6
+      }
+    },
+    {
+      "id": "LIGHTS_LEG_LONG_SIDE",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "LIGHTS_LEG_LONG_SIDE",
+      "filter": false,
+      "paint": {
+        "fill-color": {
+          "property": "COLOUR_HEX",
+          "type": "identity"
+        }
+      }
+    },
+    {
+      "id": "LIGHTS_LEG_LONG_SIDE_LONG_VALNMR",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "LIGHTS_LEG_LONG_SIDE",
+      "filter": false,
+      "paint": {
+        "fill-color": {
+          "property": "COLOUR_HEX",
+          "type": "identity"
+        }
+      }
+    },
+    {
+      "id": "LIGHTS_LEG",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "LIGHTS_LEG",
+      "filter": [
+        "all",
+        ["any", ["<=", "VALNMR_MAX", 10], ["!has", "VALNMR_MAX"]],
+        ["<", "SCALE", 100000]
+      ],
+      "paint": {
+        "line-color": "#000000",
+        "line-width": 0.2,
+        "line-opacity": 1
+      }
+    },
+    {
+      "id": "LIGHTS_LEG_LONG_VALNMR",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "LIGHTS_LEG",
+      "filter": ["all", ["<", "SCALE", 1000000], [">", "VALNMR_MAX", 10]],
+      "paint": {
+        "line-color": "#000000",
+        "line-width": 0.2,
+        "line-opacity": 1
+      }
+    },
+    {
+      "id": "LIGHTS_LEG_EXTERNAL",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "LIGHTS_LEG_EXTERNAL",
+      "filter": [
+        "all",
+        ["any", ["<=", "VALNMR_MAX", 10], ["!has", "VALNMR_MAX"]],
+        ["<", "SCALE", 100000]
+      ],
+      "paint": {
+        "line-color": "#000000",
+        "line-width": 0.2,
+        "line-opacity": 1
+      }
+    },
+    {
+      "id": "LIGHTS_LEG_EXTERNAL_LONG_VALNMR",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "LIGHTS_LEG_EXTERNAL",
+      "filter": ["all", ["<", "SCALE", 1000000], [">", "VALNMR_MAX", 10]],
+      "paint": {
+        "line-color": "#000000",
+        "line-width": 0.2,
+        "line-opacity": 1
+      }
+    },
+    {
+      "id": "LIGHTS_ARC_BG",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "LIGHTS_ARC",
+      "filter": [
+        "all",
+        ["any", ["<=", "VALNMR_MAX", 10], ["!has", "VALNMR_MAX"]],
+        ["<", "SCALE", 100000]
+      ],
+      "paint": {
+        "line-color": "#000000",
+        "line-width": 5,
+        "line-opacity": 0.5
+      }
+    },
+    {
+      "id": "LIGHTS_ARC_BG_LONG_VALNMR",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "LIGHTS_ARC",
+      "filter": ["all", ["<", "SCALE", 1000000], [">", "VALNMR_MAX", 10]],
+      "paint": {
+        "line-color": "#000000",
+        "line-width": 5,
+        "line-opacity": 0.5
+      }
+    },
+    {
+      "id": "LIGHTS_ARC_FG",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "LIGHTS_ARC",
+      "filter": [
+        "all",
+        ["any", ["<=", "VALNMR_MAX", 10], ["!has", "VALNMR_MAX"]],
+        ["<", "SCALE", 100000]
+      ],
+      "paint": {
+        "line-color": {
+          "property": "COLOUR_HEX",
+          "type": "identity"
+        },
+        "line-width": 3,
+        "line-opacity": 1
+      }
+    },
+    {
+      "id": "LIGHTS_ARC_FG_LONG_VALNMR",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "LIGHTS_ARC",
+      "filter": ["all", ["<", "SCALE", 1000000], [">", "VALNMR_MAX", 10]],
+      "paint": {
+        "line-color": {
+          "property": "COLOUR_HEX",
+          "type": "identity"
+        },
+        "line-width": 3,
+        "line-opacity": 1
+      }
+    },
+    {
+      "id": "LIGHTS_MASTER_NON_BOY",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LIGHTS_MASTER",
+      "filter": [
+        "all",
+        ["<", "SCALE", 1000000],
+        [
+          "!in",
+          "OBCL",
+          "BOYCAR",
+          "BOYINB",
+          "BOYISD",
+          "BOYLAT",
+          "BOYSAW",
+          "BOYSPP"
+        ],
+        ["!has", "CATLMK"]
+      ],
+      "layout": {
+        "icon-image": "lights109",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "LIGHTS_EXCLUDED_MAGENTA_DROP",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LIGHTS",
+      "filter": [
+        "all",
+        ["any", ["<=", "VALNMR_MAX", 10], ["!has", "VALNMR_MAX"]],
+        [">=", "SCALE", 250000],
+        ["<", "SCALE", 1000000],
+        ["has", "SECTR1"],
+        ["has", "SECTR2"]
+      ],
+      "layout": {
+        "icon-image": "LIGHTS-magenta",
+        "icon-allow-overlap": true,
+        "icon-rotate": 135
+      }
+    },
+    {
+      "id": "S52_AREA_FILL_SYMBOL",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "S52_AREA_FILL_SYMBOL",
+      "filter": ["all", ["!in", "OBCL", "MARCUL"], ["<", "scale", 1000000]],
+      "layout": {
+        "icon-image": "{SYMBOL}",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "S57_S52_SYMBOL_ROTATE_MAP",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "S52_SYMBOL",
+      "filter": [
+        "all",
+        ["has", "ROTATE"],
+        ["==", "ROTATION_ALIGNMENT", "map"],
+        ["!=", "LAND", true],
+        [
+          "any",
+          ["!has", "TNAM"],
+          ["in", "TNAM", "NORWEGIAN_COAST", "SYMBOLIZED_BOUNDARIES"]
+        ],
+        [
+          "!in",
+          "OBCL",
+          "UWTROC",
+          "SOUNDG",
+          "BUAARE",
+          "LNDARE",
+          "LNDRGN",
+          "PILPNT",
+          "TSSLPT",
+          "RESARE",
+          "CTNARE",
+          "RDOSTA",
+          "WRECKS"
+        ],
+        ["<", "scale", 1000000]
+      ],
+      "layout": {
+        "icon-image": "{SYMBOL}",
+        "icon-allow-overlap": true,
+        "icon-rotate": {
+          "property": "ROTATE",
+          "type": "identity"
+        },
+        "icon-rotation-alignment": "map"
+      }
+    },
+    {
+      "id": "S57_S52_SYMBOL_ROTATE_VIEWPORT",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "S52_SYMBOL",
+      "filter": [
+        "all",
+        ["<", "SCALE", 1000000],
+        ["has", "ROTATE"],
+        ["==", "ROTATION_ALIGNMENT", "viewport"],
+        ["!=", "LAND", true],
+        [
+          "any",
+          ["!has", "TNAM"],
+          ["in", "TNAM", "NORWEGIAN_COAST", "SYMBOLIZED_BOUNDARIES"]
+        ],
+        ["none", ["all", ["==", "OBCL", "MAGVAR"], ["==", "CSCL", 1500000]]],
+        [
+          "!in",
+          "OBCL",
+          "UWTROC",
+          "SOUNDG",
+          "BUAARE",
+          "LNDARE",
+          "LNDRGN",
+          "PILPNT",
+          "OBSTRN",
+          "RESARE",
+          "RTPBCN",
+          "CTNARE",
+          "RDOSTA",
+          "MARCUL",
+          "LNDMRK",
+          "WRECKS",
+          "ACHARE",
+          "TSSRON"
+        ],
+        ["!in", "SYMBOL", "DANGER01"],
+        ["any", ["<", "SCALE", 100000], ["!in", "SYMBOL", "LIGHTS82"]]
+      ],
+      "layout": {
+        "icon-image": "{SYMBOL}",
+        "icon-allow-overlap": true,
+        "icon-rotate": {
+          "property": "ROTATE",
+          "type": "identity"
+        },
+        "icon-rotation-alignment": "viewport"
+      }
+    },
+    {
+      "id": "S57_S52_RTPBCN_SYMBOL",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "S52_SYMBOL",
+      "filter": [
+        "all",
+        ["<", "SCALE", 1000000],
+        ["has", "ROTATE"],
+        ["==", "ROTATION_ALIGNMENT", "viewport"],
+        ["in", "OBCL", "RTPBCN"]
+      ],
+      "layout": {
+        "icon-image": "{SYMBOL}",
+        "icon-allow-overlap": true,
+        "icon-rotate": {
+          "property": "ROTATE",
+          "type": "identity"
+        },
+        "icon-rotation-alignment": "viewport"
+      }
+    },
+    {
+      "id": "S57_S52_SYMBOL_ORIENT_CRS_VIEWPORT",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "S52_SYMBOL",
+      "filter": [
+        "all",
+        ["<=", "SCALE", 1000000],
+        ["has", "ORIENT_CRS"],
+        [
+          "any",
+          ["!has", "TNAM"],
+          ["in", "TNAM", "NORWEGIAN_COAST", "SYMBOLIZED_BOUNDARIES"]
+        ],
+        ["!in", "OBCL", "TSSLPT"]
+      ],
+      "layout": {
+        "icon-image": "{SYMBOL}",
+        "icon-size": [
+          "interpolate",
+          ["linear"],
+          ["get", "SCALE"],
+          10000,
+          1,
+          500000,
+          0.5,
+          1000000,
+          0.3
+        ],
+        "icon-allow-overlap": true,
+        "icon-rotate": {
+          "property": "ORIENT_CRS",
+          "type": "identity"
+        },
+        "icon-rotation-alignment": "map"
+      }
+    },
+    {
+      "id": "TSSLPT_COMBINED_CENTER-arrow",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "TSSLPT_COMBINED_CENTER",
+      "filter": ["<", "SCALE", 5000000],
+      "layout": {
+        "icon-image": "TSSLPT51",
+        "icon-size": [
+          "interpolate",
+          ["linear"],
+          ["get", "SCALE"],
+          10000,
+          1,
+          500000,
+          0.5,
+          1000000,
+          0.3
+        ],
+        "icon-allow-overlap": true,
+        "icon-rotate": {
+          "property": "ORIENT_CRS",
+          "type": "identity"
+        },
+        "icon-rotation-alignment": "map"
+      }
+    },
+    {
+        "id": "TSSRON_COMBINED_CENTER-arrow",
+        "type": "symbol",
+        "source": "s57",
+        "source-layer": "TSSRON_COMBINED_CENTER",
+        "filter": ["<", "SCALE", 5000000],
+        "layout": {
+          "icon-image": "TSSRON51",
+          "icon-size": [
+            "interpolate",
+            ["linear"],
+            ["get", "SCALE"],
+            10000,
+            1,
+            500000,
+            0.5,
+            1000000,
+            0.3
+          ],
+          "icon-allow-overlap": true,
+          "icon-rotation-alignment": "map"
+        }
+    },
+    {
+      "id": "MARCUL_fill",
+      "type": "fill",
+      "source": "s57",
+      "source-layer": "MARCUL",
+      "paint": {
+        "fill-color": "#aaa",
+        "fill-opacity": 0.1
+      }
+    },
+    {
+      "id": "MARCUL",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "MARCUL",
+      "paint": {
+        "line-color": "#aaa",
+        "line-dasharray": [2, 1],
+        "line-width": 2
+      }
+    },
+    {
+      "id": "MARCUL-symbol",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "MARCUL",
+      "layout": {
+        "icon-image": "MARCUL02",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "land_L_S57_S52_TEXT_NON_IMPORTANT",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "S52_TEXT",
+      "filter": [
+        "all",
+        [">=", "TEXT_GROUPING", 20],
+        ["==", "LAND", true],
+        ["has", "COUNTRY_CODE"],
+        ["!=", "COUNTRY_CODE", "NO"],
+        [
+          "!in",
+          "OBCL",
+          "SBDARE",
+          "SEAARE",
+          "SOUNDG",
+          "UWTROC",
+          "BCNISD",
+          "LIGHTS",
+          "BCNSPP",
+          "BUAARE",
+          "CBLOHD",
+          "BCNLAT",
+          "BRIDGE",
+          "LNDELV",
+          "ACHARE"
+        ]
+      ],
+      "layout": {
+        "text-field": "{TEXT_VALUE}",
+        "text-font": ["WorkSans-Regular"],
+        "text-size": {
+          "property": "TEXT_SIZE",
+          "type": "identity"
+        },
+        "text-justify": {
+          "property": "TEXT_JUSTIFY",
+          "type": "identity"
+        },
+        "text-anchor": {
+          "property": "TEXT_ANCHOR",
+          "type": "identity"
+        },
+        "text-allow-overlap": false
+      },
+      "paint": {
+        "text-color": {
+          "property": "TEXT_COLOR_DAY_HEX",
+          "type": "identity"
+        },
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255, 255, 255, 0.5)"
+      }
+    },
+    {
+      "id": "land_L_S57_S52_TEXT_IMPORTANT",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "S52_TEXT",
+      "filter": [
+        "all",
+        ["<", "SCALE", 1000000],
+        ["<", "TEXT_GROUPING", 20],
+        ["==", "LAND", true],
+        [
+          "!in",
+          "OBCL",
+          "SBDARE",
+          "SEAARE",
+          "SOUNDG",
+          "UWTROC",
+          "BCNISD",
+          "LIGHTS",
+          "BCNSPP",
+          "BUAARE",
+          "CBLOHD",
+          "BCNLAT",
+          "BRIDGE",
+          "LNDELV",
+          "ACHARE"
+        ]
+      ],
+      "layout": {
+        "text-field": "{TEXT_VALUE}",
+        "text-font": ["WorkSans-Regular"],
+        "text-size": {
+          "property": "TEXT_SIZE",
+          "type": "identity"
+        },
+        "text-justify": {
+          "property": "TEXT_JUSTIFY",
+          "type": "identity"
+        },
+        "text-anchor": {
+          "property": "TEXT_ANCHOR",
+          "type": "identity"
+        },
+        "text-allow-overlap": true
+      },
+      "paint": {
+        "text-color": {
+          "property": "TEXT_COLOR_DAY_HEX",
+          "type": "identity"
+        },
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255, 255, 255, 0.5)"
+      }
+    },
+    {
+      "id": "L_S57_S52_TEXT_NON_IMPORTANT",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "S52_TEXT",
+      "filter": [
+        "all",
+        ["<", "SCALE", 1000000],
+        [">=", "TEXT_GROUPING", 20],
+        ["!=", "LAND", true],
+        [
+          "!in",
+          "OBCL",
+          "SBDARE",
+          "SEAARE",
+          "SOUNDG",
+          "UWTROC",
+          "BCNISD",
+          "LIGHTS",
+          "BCNSPP",
+          "BUAARE",
+          "CBLOHD",
+          "BCNLAT",
+          "BRIDGE",
+          "LNDELV",
+          "ACHARE"
+        ]
+      ],
+      "layout": {
+        "text-field": "{TEXT_VALUE}",
+        "text-font": ["WorkSans-Regular"],
+        "text-size": {
+          "property": "TEXT_SIZE",
+          "type": "identity"
+        },
+        "text-justify": {
+          "property": "TEXT_JUSTIFY",
+          "type": "identity"
+        },
+        "text-anchor": {
+          "property": "TEXT_ANCHOR",
+          "type": "identity"
+        },
+        "text-allow-overlap": false
+      },
+      "paint": {
+        "text-color": {
+          "property": "TEXT_COLOR_DAY_HEX",
+          "type": "identity"
+        },
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255, 255, 255, 0.5)"
+      }
+    },
+    {
+      "id": "L_S57_S52_TEXT_IMPORTANT",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "S52_TEXT",
+      "filter": [
+        "all",
+        ["<", "SCALE", 1000000],
+        ["<", "TEXT_GROUPING", 20],
+        ["!=", "LAND", true],
+        [
+          "!in",
+          "OBCL",
+          "SBDARE",
+          "SEAARE",
+          "SOUNDG",
+          "UWTROC",
+          "BCNISD",
+          "LIGHTS",
+          "BCNSPP",
+          "BUAARE",
+          "CBLOHD",
+          "BCNLAT",
+          "BRIDGE",
+          "RECTRC",
+          "LNDELV",
+          "RDOCAL"
+        ],
+        ["!in", "TEXT_VALUE", "==", "ch[71]", "ch[18]", "ch[19]"]
+      ],
+      "layout": {
+        "text-field": "{TEXT_VALUE}",
+        "text-font": ["WorkSans-Regular"],
+        "text-size": {
+          "property": "TEXT_SIZE",
+          "type": "identity"
+        },
+        "text-justify": {
+          "property": "TEXT_JUSTIFY",
+          "type": "identity"
+        },
+        "text-anchor": {
+          "property": "TEXT_ANCHOR",
+          "type": "identity"
+        },
+        "text-allow-overlap": true
+      },
+      "paint": {
+        "text-color": {
+          "property": "TEXT_COLOR_DAY_HEX",
+          "type": "identity"
+        },
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255, 255, 255, 0.5)"
+      }
+    },
+    {
+      "id": "land_L_S57_S52_TEXT_BIG_CITY",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "S52_TEXT",
+      "filter": [
+        "all",
+        ["has", "COUNTRY_CODE"],
+        ["!=", "COUNTRY_CODE", "NO"],
+        ["==", "OBCL", "BUAARE"]
+      ],
+      "layout": {
+        "text-field": "{TEXT_VALUE}",
+        "text-font": ["WorkSans-Regular"],
+        "text-size": 14,
+        "text-justify": {
+          "property": "TEXT_JUSTIFY",
+          "type": "identity"
+        },
+        "text-anchor": {
+          "property": "TEXT_ANCHOR",
+          "type": "identity"
+        },
+        "text-allow-overlap": false
+      },
+      "paint": {
+        "text-color": {
+          "property": "TEXT_COLOR_DAY_HEX",
+          "type": "identity"
+        },
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "skvalpeskjaer",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "UWTROC",
+      "filter": ["any",
+        ["all", ["has", "VALSOU"], [">=", "VALSOU", 0], ["<", "VALSOU", 0.6]],
+        ["all", ["!has", "VALSOU"], ["has", "WATLEV"], ["in", "WATLEV", 3, 5]]
+      ],
+      "layout": {
+        "icon-image": "skvalpeskjaer",
+        "icon-allow-overlap": true,
+        "icon-size": [
+          "interpolate",
+          ["linear"],
+          ["get", "SCALE"],
+          50000,
+          0.7,
+          100000,
+          0.3
+        ]
+      }
+    },
+    {
+      "id": "stjernelus",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "UWTROC",
+      "filter": ["any",
+        ["all", ["has", "VALSOU"], ["<", "VALSOU", 0]],
+        ["all", ["!has", "VALSOU"], ["has", "WATLEV"], ["in", "WATLEV", 4, 6]]
+      ],
+      "layout": {
+        "icon-image": "stjernelus",
+        "icon-allow-overlap": true,
+        "icon-size": [
+          "interpolate",
+          ["linear"],
+          ["get", "SCALE"],
+          50000,
+          0.7,
+          100000,
+          0.3
+        ]
+      }
+    },
+    {
+      "id": "grunne",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "UWTROC",
+      "filter": ["any",
+        ["all", ["has", "VALSOU"], [">=", "VALSOU", 0.6], ["<=", "VALSOU", 9.9]],
+        ["all", ["!has", "VALSOU"], ["has", "WATLEV"], ["==", "WATLEV", 2]],
+        ["all", ["!has", "VALSOU"], ["!has", "WATLEV"]]
+      ],
+      "layout": {
+        "icon-image": "grunne",
+        "icon-allow-overlap": true,
+        "icon-size": [
+          "interpolate",
+          ["linear"],
+          ["get", "SCALE"],
+          50000,
+          0.7,
+          100000,
+          0.3
+        ]
+      }
+    },
+    {
+      "id": "land_no_kommuner",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Kommunegrense",
+      "filter": ["<", "scale", 250000],
+      "paint": {
+        "line-width": 1,
+        "line-color": "rgba(150,150,150,1)",
+        "line-dasharray": [5, 5]
+      }
+    },
+    {
+      "id": "SEAARE",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "SEAARE_CENTER",
+      "filter": ["all", ["has", "COUNTRY_CODE"], ["!=", "COUNTRY_CODE", "NO"]],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["Raleway-Regular"],
+        "text-field": "{OBJNAM}",
+        "text-allow-overlap": false,
+        "text-size": 12,
+        "text-variable-anchor": ["top-left"],
+        "text-padding": 27
+      },
+      "paint": {
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "SOUNDG",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "SOUNDG",
+      "filter": [
+        "all",
+        [
+          "any",
+          ["==", "TEXT_ALLOW_OVERLAP", true],
+          ["!has", "TEXT_ALLOW_OVERLAP"]
+        ]
+      ],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["WorkSans-Italic"],
+        "text-field": "{VALSOU_TXT}",
+        "text-allow-overlap": true,
+        "text-size": 12
+      },
+      "paint": {
+        "text-color": [
+          "case",
+          ["<", ["to-number", ["get", "VALSOU"]], 20],
+          "#000000",
+          "#798995"
+        ],
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.2)"
+      }
+    },
+    {
+      "id": "SOUNDG_NOT_FILTERED",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "SOUNDG",
+      "filter": ["all", ["==", "TEXT_ALLOW_OVERLAP", false]],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["WorkSans-Italic"],
+        "text-field": "{VALSOU_TXT}",
+        "text-allow-overlap": false,
+        "text-size": 12
+      },
+      "paint": {
+        "text-color": [
+          "case",
+          ["<", ["to-number", ["get", "VALSOU"]], 20],
+          "#000000",
+          "#798995"
+        ],
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.2)"
+      }
+    },
+    {
+      "id": "UWTROC",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "UWTROC",
+      "filter": [
+        "all",
+        ["<", "SCALE", 100000],
+        [">=", "VALSOU", 0.5],
+        [
+          "any",
+          ["==", "TEXT_ALLOW_OVERLAP", true],
+          ["!has", "TEXT_ALLOW_OVERLAP"]
+        ]
+      ],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["WorkSans-Italic"],
+        "text-variable-anchor": ["top-left"],
+        "text-field": "{VALSOU_TXT}",
+        "text-allow-overlap": true,
+        "text-size": 12
+      },
+      "paint": {
+        "text-color": [
+          "case",
+          ["<", ["to-number", ["get", "VALSOU"]], 20],
+          "#000000",
+          "#798995"
+        ],
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "UWTROC_NOT_FILTERED",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "UWTROC",
+      "filter": [
+        "all",
+        [">", "VALSOU", 1],
+        ["==", "TEXT_ALLOW_OVERLAP", false]
+      ],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["WorkSans-Italic"],
+        "text-variable-anchor": ["top-left"],
+        "text-field": "{VALSOU_TXT}",
+        "text-allow-overlap": false,
+        "text-size": 12
+      },
+      "paint": {
+        "text-color": [
+          "case",
+          ["<", ["to-number", ["get", "VALSOU"]], 20],
+          "#000000",
+          "#798995"
+        ],
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "SBDARE",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "SBDARE",
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["WorkSans-Italic"],
+        "text-letter-spacing": 0.2,
+        "text-field": "{NATSUR_TXT_SHORT}",
+        "text-allow-overlap": true,
+        "text-size": 11
+      },
+      "paint": {
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "RESARE-text",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "RESARE_CENTER",
+      "filter": [
+        "all",
+        ["!has", "SPEED_LIMIT_KN"],
+        [
+          "any",
+          ["<", "SCALE", 250000],
+          ["all", ["<", "SCALE", 1000000], ["==", "CATREA_1", true]]
+        ]
+      ],
+      "layout": {
+        "text-font": ["WorkSans-Italic"],
+        "text-field": "{CATREA_TXT}",
+        "text-allow-overlap": true,
+        "text-ignore-placement": true,
+        "text-size": ["case", ["==", ["get", "CATREA_27"], true], 10, 15]
+      },
+      "paint": {
+        "text-color": [
+          "case",
+          ["==", ["get", "CATREA_27"], true],
+          "#13aa0b",
+          "#ec008c"
+        ],
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "EXTERNAL_ECONOMIC_ZONE",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "EXEZNE_OUTLINE",
+      "paint": {
+        "line-width": 6,
+        "line-color": "#ec008c",
+        "line-dasharray": [0.1, 3]
+      }
+    },
+    {
+      "id": "EXTERNAL_ECONOMIC_ZONE_LINE",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "EXEZNE_OUTLINE",
+      "paint": {
+        "line-width": 1,
+        "line-color": "#ec008c"
+      }
+    },
+    {
+      "id": "Military_Area",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "MIPARE_OUTLINE",
+      "filter": ["<=", "SCALE", 250000],
+      "paint": {
+        "line-color": "#ec008c",
+        "line-dasharray": [4, 2]
+      }
+    },
+    {
+      "id": "Military_Area_flame_icon",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "MIPARE_LINE_POINT",
+      "filter": ["<=", "SCALE", 250000],
+      "layout": {
+        "icon-image": "flame",
+        "icon-size": 1.0,
+        "icon-allow-overlap": true,
+        "icon-rotate": ["+", ["get", "ROTATE_CRS"], 180],
+        "icon-rotation-alignment": "map"
+      }
+    },
+    {
+      "id": "explosive_Area",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "DMPGRD",
+      "paint": {
+        "line-color": "#ec008c",
+        "line-width": 1,
+        "line-dasharray": [4, 2]
+      }
+    },
+    {
+      "id": "explosive_Area-info",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "DMPGRD",
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["WorkSans-Italic"],
+        "text-field": "Explosives Dumping Ground",
+        "text-size": 12
+      },
+      "paint": {
+        "text-color": "#ec008c"
+      }
+    },
+    {
+      "id": "OBSTRN_CATOBS_6",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "OBSTRN",
+      "filter": ["==", "CATOBS", "6"],
+      "layout": {
+        "icon-image": "obsare118",
+        "visibility": "visible",
+        "text-font": ["WorkSans-Regular"],
+        "text-field": "{OBJNAM}",
+        "text-size": 12
+      }
+    },
+    {
+      "id": "OBSTRN_CATOBS_6_WITHOUT_OBJNAM_info",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "OBSTRN",
+      "filter": ["all", ["!has", "{OBJNAM}"], ["==", "CATOBS", "6"]],
+      "layout": {
+        "icon-image": "obsare118",
+        "text-font": ["WorkSans-Regular"],
+        "text-field": "{INFORM}",
+        "text-size": 14,
+        "text-variable-anchor": ["top-left"],
+        "text-padding": 10
+      },
+      "paint": {
+        "text-color": "#ec008c"
+      }
+    },
+    {
+      "id": "OBSTRN_POINT_CATOBS_NOT_6",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "OBSTRN",
+      "filter": ["all", ["==", "$type", "Point"], ["!=", "CATOBS", "6"]],
+      "layout": {
+        "icon-image": "OBSTRN_UNDER_10_M",
+        "text-font": ["WorkSans-Regular"],
+        "text-field": "{VALSOU_TXT}",
+        "text-size": 12,
+        "text-offset": [0, 0.1]
+      }
+    },
+    {
+      "id": "LIGHTS_DES_WITH_NAME",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LIGHTS",
+      "filter": [
+        "all",
+        ["in", "LIGHT_CLASS", "FL - Fyrlykt"],
+        ["any", ["<=", "VALNMR_MAX", 10], ["!has", "VALNMR_MAX"]],
+        ["<", "SCALE", 100000],
+        ["==", "VALNMR_MAX_IS_THIS_SINGLE", true],
+        ["!=", "HAS_RTPBCN", true]
+      ],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["Raleway-Regular"],
+        "text-variable-anchor": ["left", "right"],
+        "text-offset": [2.5, 0],
+        "text-justify": "auto",
+        "text-field": "{LIGHT_NAME}\n{LIGHT_DES}",
+        "text-size": 12,
+        "text-allow-overlap": true
+      },
+      "paint": {
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "LIGHTS_DES_WITH_NAME_LONG_VALNMR_OR_HAS_RTPBCN",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LIGHTS",
+      "filter": [
+        "all",
+        ["<", "SCALE", 1000000],
+        ["in", "LIGHT_CLASS", "FL - Fyrlykt"],
+        ["==", "VALNMR_MAX_IS_THIS_SINGLE", true],
+        ["any", [">", "VALNMR_MAX", 10], ["==", "HAS_RTPBCN", true]]
+      ],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["Raleway-Regular"],
+        "text-variable-anchor": ["left", "right"],
+        "text-offset": [3, 0],
+        "text-field": "{LIGHT_NAME}\n{LIGHT_DES}",
+        "text-size": 12,
+        "text-allow-overlap": true,
+        "text-justify": "auto"
+      },
+      "paint": {
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "LIGHTS_DES_NO_NAME",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LIGHTS",
+      "filter": [
+        "all",
+        ["!in", "LIGHT_CLASS", "FL - Fyrlykt", "FS - Fyrstasjon"],
+        ["any", ["<=", "VALNMR_MAX", 10], ["!has", "VALNMR_MAX"]],
+        ["<", "SCALE", 100000],
+        ["==", "VALNMR_MAX_IS_THIS_SINGLE", true]
+      ],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["Raleway-Italic"],
+        "text-variable-anchor": ["bottom-right"],
+        "text-padding": 10,
+        "text-field": "{LIGHT_DES}",
+        "text-size": 11,
+        "text-allow-overlap": true
+      },
+      "paint": {
+        "text-color": {
+          "property": "TEXT_COLOR_DAY_HEX",
+          "type": "identity"
+        },
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255, 255, 255, 0.5)"
+      }
+    },
+    {
+      "id": "LIGHTS_DES_NO_NAME_LONG_VALNMR",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LIGHTS",
+      "filter": [
+        "all",
+        ["<", "SCALE", 1000000],
+        ["!in", "LIGHT_CLASS", "FL - Fyrlykt", "FS - Fyrstasjon"],
+        [">", "VALNMR_MAX", 10],
+        ["==", "VALNMR_MAX_IS_THIS_SINGLE", true]
+      ],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["Raleway-Italic"],
+        "text-variable-anchor": ["bottom-right"],
+        "text-padding": 10,
+        "text-field": "{LIGHT_DES}",
+        "text-size": 11,
+        "text-allow-overlap": true
+      },
+      "paint": {
+        "text-color": {
+          "property": "TEXT_COLOR_DAY_HEX",
+          "type": "identity"
+        },
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255, 255, 255, 0.5)"
+      }
+    },
+    {
+      "id": "LIGHTS_DES_FOR_FS",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LIGHTS",
+      "filter": [
+        "all",
+        ["in", "LIGHT_CLASS", "FS - Fyrstasjon"],
+        ["<", "VALNMR_MAX", 10],
+        ["<", "SCALE", 100000],
+        ["==", "VALNMR_MAX_IS_THIS_SINGLE", true],
+        ["!=", "HAS_RTPBCN", true]
+      ],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["Raleway-Regular"],
+        "text-variable-anchor": ["bottom-left"],
+        "text-padding": 20,
+        "text-field": "{LIGHT_NAME} \n {LIGHT_DES} {FORMATTED_HEIGHT} {FORMATTED_VALNMR}",
+        "text-size": 14,
+        "text-allow-overlap": false
+      },
+      "paint": {
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "LIGHTS_DES_FOR_FS_LONG_VALNMR_OR_HAS_RTPBCN",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LIGHTS",
+      "filter": [
+        "all",
+        ["<", "SCALE", 1000000],
+        ["in", "LIGHT_CLASS", "FS - Fyrstasjon"],
+        ["==", "VALNMR_MAX_IS_THIS_SINGLE", true],
+        ["any", [">", "VALNMR_MAX", 10], ["==", "HAS_RTPBCN", true]]
+      ],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["Raleway-Regular"],
+        "text-variable-anchor": ["left", "right"],
+        "text-field": "{LIGHT_NAME} \n {LIGHT_DES} {FORMATTED_HEIGHT} {FORMATTED_VALNMR}",
+        "text-size": 14,
+        "text-offset": [2.5, 1.5],
+        "text-allow-overlap": true,
+        "text-justify": "auto"
+      },
+      "paint": {
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "LIGHT_DES_LITDSN",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LIGHTS",
+      "filter": [
+        "all",
+        ["<", "SCALE", 1000000],
+        ["!has", "LIGHT_DES"],
+        ["<", "SCALE", 250000]
+      ],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["Raleway-Regular"],
+        "text-variable-anchor": ["bottom"],
+        "text-padding": 15,
+        "text-field": "{LIGHT_DES_LITDSN}",
+        "text-size": 12,
+        "text-allow-overlap": false
+      },
+      "paint": {
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "LIGHT_DES_LITDSN_LONG_VALNMR",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LIGHTS",
+      "filter": [
+        "all",
+        ["<", "SCALE", 1000000],
+        ["!has", "LIGHT_DES"],
+        [">", "VALNMR_MAX", 10]
+      ],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["Raleway-Regular"],
+        "text-variable-anchor": ["bottom"],
+        "text-padding": 5,
+        "text-field": "{LIGHT_DES_LITDSN}",
+        "text-size": 12,
+        "text-allow-overlap": false
+      },
+      "paint": {
+        "text-halo-width": 1.5,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "rundlysende_lykter",
+      "type": "circle",
+      "source": "s57",
+      "source-layer": "LIGHTS",
+      "filter": [
+        "all",
+        ["<", "SCALE", 1000000],
+        ["in", "LIGHT_CLASS", "FS - Fyrstasjon"],
+        ["!has", "SECTR1"],
+        ["!has", "SECTR2"]
+      ],
+      "paint": {
+        "circle-radius": 25,
+        "circle-opacity": 0,
+        "circle-stroke-color": {
+          "property": "COLOUR_HEX",
+          "type": "identity"
+        },
+        "circle-stroke-width": 6,
+        "circle-stroke-opacity": 0.7
+      }
+    },
+    {
+      "id": "RESARE-info",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "RESARE",
+      "filter": ["!has", "SPEED_LIMIT_KN"],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["WorkSans-Italic"],
+        "text-variable-anchor": ["bottom-right"],
+        "text-padding": 7,
+        "text-field": "{INFORM_SHORT}",
+        "text-size": 12,
+        "symbol-placement": "line"
+      },
+      "paint": {
+        "text-color": "#ec008c"
+      }
+    },
+    {
+      "id": "Grenser_Caution_info",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "CTNARE_OUTLINE",
+      "filter": [
+        "all",
+        ["!has", "INFORM_DANGER_WAVE_AREA"],
+        [
+          "!in",
+          "INFORM",
+          "Pilot area",
+          "Pilot Boarding Area",
+          "Caution: Pilot Boarding Area"
+        ]
+      ],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["WorkSans-Regular"],
+        "symbol-placement": "line",
+        "text-field": "Local cautions",
+        "text-size": 12,
+        "text-offset": [0, 1]
+      },
+      "paint": {
+        "text-color": "#ec008c"
+      }
+    },
+    {
+      "id": "losområdet_info",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "CTNARE_CENTER",
+      "filter": [
+        "all",
+        [
+          "in",
+          "INFORM",
+          "Pilot area",
+          "Pilot Boarding Area",
+          "Caution: Pilot Boarding Area"
+        ],
+        ["<", "SCALE", 1000000]
+      ],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["WorkSans-Regular"],
+        "symbol-avoid-edges": true,
+        "text-field": "{INFORM}",
+        "text-size": 15
+      },
+      "paint": {
+        "text-color": "#ec008c"
+      }
+    },
+    {
+      "id": "CTNARE_line",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "CTNARE_OUTLINE",
+      "filter": [
+        "all",
+        [
+          "!in",
+          "INFORM",
+          "Pilot area",
+          "Pilot Boarding Area",
+          "Caution: Pilot Boarding Area"
+        ],
+        ["!has", "INFORM_DANGER_WAVE_AREA"]
+      ],
+      "paint": {
+        "line-color": "#ec008c",
+        "line-dasharray": [4, 4],
+        "line-width": 1
+      }
+    },
+    {
+      "id": "CTNARE_pilot_line",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "CTNARE_OUTLINE",
+      "filter": [
+        "all",
+        [
+          "in",
+          "INFORM",
+          "Pilot area",
+          "Pilot Boarding Area",
+          "Caution: Pilot Boarding Area"
+        ],
+        ["<", "SCALE", 1000000]
+      ],
+      "paint": {
+        "line-color": "#ec008c",
+        "line-dasharray": [4, 4],
+        "line-width": 1
+      }
+    },
+    {
+      "id": "no-area-danger-wave_line",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "noareadangerwave",
+      "filter": ["<=", "scale", 500000],
+      "paint": {
+        "line-color": "#ec008c",
+        "line-dasharray": [4, 4],
+        "line-width": 1
+      }
+    },
+    {
+      "id": "no-area-danger-wave_text",
+      "type": "symbol",
+      "source": "sosi",
+      "source-layer": "noareadangerwave",
+      "filter": ["<=", "scale", 500000],
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["WorkSans-Regular"],
+        "symbol-placement": "line",
+        "text-field": "Caution - Dangerous waves",
+        "text-size": 12,
+        "text-offset": [0, 1],
+        "text-allow-overlap": true
+      },
+      "paint": {
+        "text-color": "#ec008c"
+      }
+    },
+    {
+      "id": "Radio",
+      "type": "line",
+      "source": "s57",
+      "source-layer": "RDOCAL",
+      "filter": ["<", "SCALE", 1000000],
+      "paint": {
+        "line-color": "#ec008c",
+        "line-dasharray": [4, 4],
+        "line-width": 1
+      }
+    },
+    {
+      "id": "Radio-symbol",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "RDOCAL_LINE_POINT",
+      "filter": ["all", ["<", "SCALE", 1000000], ["has", "COMCHA_TXT"]],
+      "layout": {
+          "icon-image": "radio-channel-directed",
+          "icon-rotate": ["get", "ORIENT_CRS"],
+          "icon-offset": [0, -4.5],
+          "text-field": ["get", "COMCHA_TXT"],
+          "text-font": ["WorkSans-Regular"],
+          "text-size": 8,
+          "text-anchor": "center",
+          "text-offset": [0, 0.15]
+      },
+      "paint": {
+          "text-color": "#ec008c"
+      }
+    },
+    {
+      "id": "Racon_RDOSTA_type",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "RDOSTA",
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["WorkSans-Bold"],
+        "text-variable-anchor": ["left"],
+        "text-field": "{CATROS_TXT_SHORT}",
+        "text-padding": 40,
+        "text-size": 20
+      },
+      "paint": {
+        "text-color": "#ec008c"
+      }
+    },
+    {
+      "id": "Racon-RTPBCN_type",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "RTPBCN",
+      "layout": {
+        "visibility": "visible",
+        "text-font": ["WorkSans-Regular"],
+        "text-variable-anchor": ["bottom-left"],
+        "text-field": "Racon{SIGGRP}",
+        "text-offset": [2.5, 1.2],
+        "text-size": 14,
+        "text-allow-overlap": true
+      },
+      "paint": {
+        "text-color": "#ec008c",
+        "text-halo-color": "rgba(255, 255, 255, 0.7)",
+        "text-halo-width": 1.5
+      }
+    },
+    {
+      "id": "WRECKS-symbol_01",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "WRECKS",
+      "filter": ["any", ["in", "WATLEV", 1, 2, 4, 5], ["in", "CATWRK", 4, 5]],
+      "layout": {
+        "icon-image": "wrecks76",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "WRECKS-symbol_04",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "WRECKS",
+      "filter": ["all", ["==", "WATLEV", 3], ["==", "CATWRK", 1]],
+      "layout": {
+        "icon-image": "WRECKS04",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "WRECKS-symbol_05",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "WRECKS",
+      "filter": [
+        "any",
+        ["all", ["==", "WATLEV", 3], ["==", "CATWRK", 2]],
+        [
+          "none",
+          ["any", ["in", "WATLEV", 1, 2, 4, 5], ["in", "CATWRK", 4, 5]],
+          ["all", ["==", "WATLEV", 3], ["==", "CATWRK", 1]]
+        ]
+      ],
+      "layout": {
+        "icon-image": "WRECKS05",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "WRECKS-label",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "WRECKS",
+      "filter": ["has", "VALSOU"],
+      "layout": {
+        "text-font": ["WorkSans-Regular"],
+        "text-field": "({VALSOU_TXT})",
+        "text-allow-overlap": true,
+        "text-size": 12,
+        "text-anchor": "top-left",
+        "text-offset": [0.4, 0.2]
+      }
+    },
+    {
+      "id": "land_no_Sykehus",
+      "type": "symbol",
+      "source": "sosi",
+      "source-layer": "Bygning",
+      "filter": ["in", "BYGGTYP_NBR", "719", "970"],
+      "layout": {
+        "visibility": "visible",
+        "icon-image": "SYKEHUS",
+        "icon-allow-overlap": false
+      }
+    },
+    {
+      "id": "land_church-symbol",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "BUAARE",
+      "filter": ["==", "INFORM", "Kirke"],
+      "layout": {
+        "icon-image": "church55",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "land_church-symbol_2",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "LNDRGN",
+      "filter": ["==", "INFORM", "Kirke"],
+      "layout": {
+        "icon-image": "church55",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "land_church-symbol_3",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "BUISGL",
+      "filter": ["has", "FUNCTN_20"],
+      "layout": {
+        "icon-image": "church55",
+        "icon-allow-overlap": true
+      }
+    },
+    {
+      "id": "RESARE-nofish",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "RESARE_NOLAND",
+      "filter": [
+        "all",
+        ["!has", "SPEED_LIMIT_KN"],
+        ["!in", "CATREA", "1", "4", "5", "9", "18", "23"],
+        ["any", ["has", "RESTRN_3"], ["has", "RESTRN_4"]]
+      ],
+      "layout": {
+        "icon-image": "EMFSHRE1"
+      }
+    },
+    {
+      "id": "RESARE-noanchor",
+      "type": "symbol",
+      "source": "s57",
+      "source-layer": "RESARE_NOLAND",
+      "filter": ["has", "RESTRN_1"],
+      "layout": {
+        "icon-image": "N10_Reported_anchorage_prohibited"
+      }
+    },
+    {
+      "id": "land_no_Rørgate-blocks",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Rørgate",
+      "paint": {
+        "line-color": "rgba(1, 1, 1, 1)",
+        "line-width": 2.8,
+        "line-dasharray": [1, 5]
+      }
+    },
+    {
+      "id": "land_no_Rørgate",
+      "type": "line",
+      "source": "sosi",
+      "source-layer": "Rørgate",
+      "paint": {
+        "line-color": "rgba(1, 1, 1, 1)",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "land_no_Hoppbakke",
+      "type": "symbol",
+      "source": "sosi",
+      "source-layer": "Hoppbakke",
+      "layout": {
+        "visibility": "visible",
+        "icon-image": "hoppbakke",
+        "icon-allow-overlap": true,
+        "icon-rotate": ["to-number", ["get", "rotateCrs"]],
+        "icon-rotation-alignment": "viewport"
+      }
+    },
+    {
+      "id": "land_no_text_Navneenhet_Polar",
+      "type": "symbol",
+      "source": "sosi",
+      "source-layer": "Navneenhet",
+      "filter": [
+        "all",
+        ["has", "MSTOKK"],
+        ["<=", ["get", "scale"], 1000000],
+        ["<", ["get", "scale"], ["*", ["to-number", ["get", "MSTOKK"]], 500]]
+      ],
+      "layout": {
+        "text-font": ["Raleway-Regular"],
+        "text-field": ["get", "SNAVN"],
+        "text-size": [
+          "case",
+          ["==", ["get", "SKRIFTKODE"], "1"],
+          14,
+          ["==", ["get", "SKRIFTKODE"], "2"],
+          12.87,
+          ["==", ["get", "SKRIFTKODE"], "3"],
+          10.72,
+          ["==", ["get", "SKRIFTKODE"], "4"],
+          13,
+          ["==", ["get", "SKRIFTKODE"], "5"],
+          14,
+          ["==", ["get", "SKRIFTKODE"], "5A"],
+          9.87,
+          ["==", ["get", "SKRIFTKODE"], "6"],
+          14,
+          ["==", ["get", "SKRIFTKODE"], "7"],
+          18,
+          ["==", ["get", "SKRIFTKODE"], "8"],
+          14,
+          ["==", ["get", "SKRIFTKODE"], "9"],
+          12,
+          ["==", ["get", "SKRIFTKODE"], "10"],
+          13.02,
+          ["==", ["get", "SKRIFTKODE"], "10A"],
+          14.21,
+          ["==", ["get", "SKRIFTKODE"], "10B"],
+          15.79,
+          ["==", ["get", "SKRIFTKODE"], "11"],
+          11.05,
+          ["==", ["get", "SKRIFTKODE"], "12"],
+          13,
+          ["==", ["get", "SKRIFTKODE"], "13"],
+          7.89,
+          ["==", ["get", "SKRIFTKODE"], "14"],
+          13,
+          ["==", ["get", "SKRIFTKODE"], "15"],
+          14,
+          ["==", ["get", "SKRIFTKODE"], "16A"],
+          16,
+          ["==", ["get", "SKRIFTKODE"], "17"],
+          14,
+          ["==", ["get", "SKRIFTKODE"], "17A"],
+          16,
+          ["==", ["get", "SKRIFTKODE"], "18"],
+          14,
+          ["==", ["get", "SKRIFTKODE"], "19"],
+          14,
+          ["==", ["get", "SKRIFTKODE"], "20"],
+          14,
+          22
+        ],
+        "text-allow-overlap": true,
+        "text-letter-spacing": [
+          "case",
+          ["==", ["get", "SPERRING"], "S"],
+          0.2,
+          0
+        ],
+        "text-rotate": ["get", "textRotateCrs"],
+        "text-rotation-alignment": "map"
+      },
+      "paint": {
+        "text-color": [
+          "case",
+          ["==", ["get", "SKRIFTKODE"], "10"],
+          "#005ce6",
+          ["==", ["get", "SKRIFTKODE"], "11"],
+          "#005ce6",
+          ["==", ["get", "SKRIFTKODE"], "12"],
+          "#005ce6",
+          ["==", ["get", "SKRIFTKODE"], "14"],
+          "#005ce6",
+          ["==", ["get", "SKRIFTKODE"], "15A"],
+          "#005ce6",
+          ["==", ["get", "SKRIFTKODE"], "16A"],
+          "#005ce6",
+          ["==", ["get", "SKRIFTKODE"], "17A"],
+          "#005ce6",
+          ["==", ["get", "SKRIFTKODE"], "18A"],
+          "#005ce6",
+          "rgba(0,0,0,1.0)"
+        ],
+        "text-halo-width": 1.0,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "land_text_regular_rotated_zoomIn",
+      "type": "symbol",
+      "source": "placename",
+      "source-layer": "text",
+      "filter": [
+        "all",
+        ["==", "lang", "norsk"],
+        ["<", "scale", 250000],
+        ["==", "bold", false],
+        ["==", "italic", false],
+        ["!in", "source", "n1000", "n2000", "n5000"],
+        [
+          "!in",
+          "sourceType",
+          "høydetallPunkt",
+          "fastmerke",
+          "høydetallVann",
+          "vann",
+          "gruppeAvTjern",
+          "tjern",
+          "bekk",
+          "myr",
+          "gruppeAvVann",
+          "delAvInnsjø",
+          "innsjø",
+          "vik",
+          "sund",
+          "foss",
+          "elv"
+        ],
+        ["!in", "rotate", 0, 360, 1, 359]
+      ],
+      "layout": {
+        "text-font": ["Raleway-Regular"],
+        "text-field": ["get", "text"],
+        "text-size": ["*", ["get", "fontSize"], 2.0],
+        "text-allow-overlap": true,
+        "text-rotate": {
+          "property": "rotate_crs",
+          "type": "identity"
+        },
+        "text-anchor": ["get", "textAnchor"],
+        "text-rotation-alignment": "map"
+      },
+      "paint": {
+        "text-color": ["get", "textColor"],
+        "text-halo-width": 1.0,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "land_text_regular_rotated",
+      "type": "symbol",
+      "source": "placename",
+      "source-layer": "text",
+      "filter": [
+        "all",
+        ["==", "lang", "norsk"],
+        ["<", "scale", 500000],
+        ["==", "bold", false],
+        ["==", "italic", false],
+        ["!in", "source", "n1000", "n2000", "n5000"],
+        [
+          "!in",
+          "sourceType",
+          "militærtByggAnlegg",
+          "fritidsbolig",
+          "hotell",
+          "eiendom",
+          "adressenavn",
+          "kirke",
+          "grend",
+          "bruk",
+          "turisthytte",
+          "seterStøl",
+          "seterStøl",
+          "vegstrekning",
+          "gard",
+          "tunnel",
+          "høydetallPunkt",
+          "fastmerke",
+          "høydetallVann",
+          "vann",
+          "gruppeAvTjern",
+          "tjern",
+          "bekk",
+          "myr",
+          "gruppeAvVann",
+          "delAvInnsjø",
+          "innsjø",
+          "vik",
+          "sund",
+          "foss",
+          "elv"
+        ],
+        ["!in", "rotate", 0, 360, 1, 359]
+      ],
+      "layout": {
+        "text-font": ["Raleway-Regular"],
+        "text-field": ["get", "text"],
+        "text-size": ["*", ["get", "fontSize"], 2.0],
+        "text-allow-overlap": true,
+        "text-rotate": {
+          "property": "rotate_crs",
+          "type": "identity"
+        },
+        "text-anchor": ["get", "textAnchor"],
+        "text-rotation-alignment": "map"
+      },
+      "paint": {
+        "text-color": ["get", "textColor"],
+        "text-halo-width": 1.0,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "land_text_regular_not_rotated",
+      "type": "symbol",
+      "source": "placename",
+      "source-layer": "text",
+      "filter": [
+        "all",
+        ["==", "lang", "norsk"],
+        ["<", "scale", 500000],
+        ["==", "bold", false],
+        ["==", "italic", false],
+        ["!in", "source", "n1000", "n2000", "n5000"],
+        [
+          "!in",
+          "sourceType",
+          "kommune",
+          "eng",
+          "landingsplass",
+          "alpinanlegg",
+          "kraftstasjon",
+          "vaktstasjonBeredsskapsbygning",
+          "grensemerke",
+          "landskapsområde",
+          "forretningsbygg",
+          "vegstrekning",
+          "flyplass",
+          "museumGalleriBibliotek",
+          "utsiktspunkt",
+          "annenBygningForReligionsutøvelse",
+          "idrettsanlegg",
+          "ferjekai",
+          "fyrlykt",
+          "fyrstasjon",
+          "annenIndustri-OgLagerbygning",
+          "universitetHøgskole",
+          "brygge",
+          "parkeringsplass",
+          "serveringssted",
+          "forsamlingshusKulturhus",
+          "verneområde",
+          "bergverk",
+          "annenKulturdetalj",
+          "campingplass",
+          "byggForJordbrukFiskeOgFangst",
+          "gammelBosettingsplass",
+          "skole",
+          "dam",
+          "hyttefelt",
+          "varde",
+          "stasjon",
+          "holdeplass",
+          "helseinstitusjon",
+          "kanal",
+          "sluse",
+          "eneboligMindreBoligbygg",
+          "setervoll",
+          "vegkryss",
+          "bru",
+          "ferjekai",
+          "severdighet",
+          "militærtByggAnlegg",
+          "kirke",
+          "grend",
+          "pensjonat",
+          "eiendom",
+          "hotell",
+          "fritidsbolig",
+          "forsamlingshusKulturhus",
+          "flyplass",
+          "tunnel",
+          "seterStøl",
+          "forsamlingshusKulturhus",
+          "boligfelt",
+          "fabrikk",
+          "industriområde",
+          "turisthytte",
+          "fornøyelsespark",
+          "bruk",
+          "gard",
+          "navnegard",
+          "høydetallPunkt",
+          "fastmerke",
+          "høydetallVann",
+          "vann",
+          "gruppeAvTjern",
+          "tjern",
+          "bekk",
+          "myr",
+          "gruppeAvVann",
+          "delAvInnsjø",
+          "innsjø",
+          "vik",
+          "sund",
+          "foss",
+          "elv"
+        ],
+        ["in", "rotate", 0, 360, 1, 359]
+      ],
+      "layout": {
+        "text-font": ["Raleway-Regular"],
+        "text-field": ["get", "text"],
+        "text-size": ["*", ["get", "fontSize"], 2.0],
+        "text-allow-overlap": true,
+        "text-anchor": ["get", "textAnchor"],
+        "text-rotation-alignment": "viewport"
+      },
+      "paint": {
+        "text-color": ["get", "textColor"],
+        "text-halo-width": 1.0,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "land_text_bold_rotated",
+      "type": "symbol",
+      "source": "placename",
+      "source-layer": "text",
+      "filter": [
+        "all",
+        ["==", "lang", "norsk"],
+        ["<", "scale", 500000],
+        ["==", "bold", true],
+        ["==", "italic", false],
+        ["!in", "rotate", 0, 360, 1, 359]
+      ],
+      "layout": {
+        "text-font": ["Raleway-Bold"],
+        "text-field": ["get", "text"],
+        "text-size": ["*", ["get", "fontSize"], 2.0],
+        "text-allow-overlap": true,
+        "text-rotate": {
+          "property": "rotate_crs",
+          "type": "identity"
+        },
+        "text-anchor": ["get", "textAnchor"],
+        "text-rotation-alignment": "map"
+      },
+      "paint": {
+        "text-color": ["get", "textColor"],
+        "text-halo-width": 1.0,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "land_text_bold_not_rotated",
+      "type": "symbol",
+      "source": "placename",
+      "source-layer": "text",
+      "filter": [
+        "all",
+        ["==", "lang", "norsk"],
+        ["<", "scale", 1000001],
+        ["==", "bold", true],
+        ["==", "italic", false],
+        [
+          "!in",
+          "sourceType",
+          "tettsted",
+          "bydel",
+          "fastmerke",
+          "tettbebyggelse",
+          "høydetallVann",
+          "høydetallPunkt"
+        ],
+        ["in", "rotate", 0, 360, 1, 359]
+      ],
+      "layout": {
+        "text-font": ["Raleway-Bold"],
+        "text-field": ["get", "text"],
+        "text-size": ["*", ["get", "fontSize"], 2.0],
+        "text-allow-overlap": false,
+        "text-anchor": ["get", "textAnchor"],
+        "text-rotation-alignment": "viewport"
+      },
+      "paint": {
+        "text-color": ["get", "textColor"],
+        "text-halo-width": 1.0,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "land_text_italic_rotated_zoomIn",
+      "type": "symbol",
+      "source": "placename",
+      "source-layer": "text",
+      "filter": [
+        "all",
+        ["==", "lang", "norsk"],
+        ["<", "scale", 250000],
+        ["==", "bold", false],
+        ["==", "italic", true],
+        ["!in", "source", "n1000", "n2000", "n5000"],
+        [
+          "!in",
+          "sourceType",
+          "høydetallPunkt",
+          "fastmerke",
+          "høydetallVann",
+          "vann",
+          "gruppeAvTjern",
+          "tjern",
+          "bekk",
+          "myr",
+          "gruppeAvVann",
+          "delAvInnsjø",
+          "innsjø",
+          "vik",
+          "sund",
+          "foss",
+          "elv"
+        ],
+        ["!in", "rotate", 0, 360, 1, 359]
+      ],
+      "layout": {
+        "text-font": ["Raleway-Italic"],
+        "text-field": ["get", "text"],
+        "text-size": ["*", ["get", "fontSize"], 2.0],
+        "text-allow-overlap": true,
+        "text-rotate": {
+          "property": "rotate_crs",
+          "type": "identity"
+        },
+        "text-anchor": ["get", "textAnchor"],
+        "text-rotation-alignment": "map"
+      },
+      "paint": {
+        "text-color": ["get", "textColor"],
+        "text-halo-width": 1.0,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "land_text_italic_rotated_ZoomOut",
+      "type": "symbol",
+      "source": "placename",
+      "source-layer": "text",
+      "filter": [
+        "all",
+        ["==", "lang", "norsk"],
+        ["==", "bold", false],
+        ["==", "italic", true],
+        ["in", "sourceType", "fjord"]
+      ],
+      "layout": {
+        "text-font": ["Raleway-Italic"],
+        "text-field": ["get", "text"],
+        "text-size": ["*", ["get", "fontSize"], 2.0],
+        "text-allow-overlap": false,
+        "text-rotate": {
+          "property": "rotate_crs",
+          "type": "identity"
+        },
+        "text-anchor": ["get", "textAnchor"],
+        "text-rotation-alignment": "map"
+      },
+      "paint": {
+        "text-color": ["get", "textColor"],
+        "text-halo-width": 1.0,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "land_text_italic_rotated",
+      "type": "symbol",
+      "source": "placename",
+      "source-layer": "text",
+      "filter": [
+        "all",
+        ["==", "lang", "norsk"],
+        ["<", "scale", 500000],
+        ["==", "bold", false],
+        ["==", "italic", true],
+        ["!in", "source", "n1000", "n2000", "n5000"],
+        [
+          "!in",
+          "sourceType",
+          "bakke",
+          "haug",
+          "nesISjø",
+          "fjellside",
+          "utmark",
+          "nesVedElver",
+          "senkning",
+          "vidde",
+          "militærtByggAnlegg",
+          "eid",
+          "eidISjø",
+          "juv",
+          "hei",
+          "øyISjø",
+          "skog",
+          "slette",
+          "grend",
+          "landskapsområde",
+          "skar",
+          "li",
+          "dalføre",
+          "rygg",
+          "ås",
+          "tunnel",
+          "fjellområde",
+          "topp",
+          "fjell",
+          "dal",
+          "høydetallPunkt",
+          "fastmerke",
+          "høydetallVann",
+          "vann",
+          "gruppeAvTjern",
+          "tjern",
+          "bekk",
+          "myr",
+          "gruppeAvVann",
+          "delAvInnsjø",
+          "innsjø",
+          "vik",
+          "sund",
+          "foss",
+          "elv"
+        ],
+        ["!in", "rotate", 0, 360, 1, 359]
+      ],
+      "layout": {
+        "text-font": ["Raleway-Italic"],
+        "text-field": ["get", "text"],
+        "text-size": ["*", ["get", "fontSize"], 2.0],
+        "text-allow-overlap": true,
+        "text-rotate": {
+          "property": "rotate_crs",
+          "type": "identity"
+        },
+        "text-anchor": ["get", "textAnchor"],
+        "text-rotation-alignment": "map"
+      },
+      "paint": {
+        "text-color": ["get", "textColor"],
+        "text-halo-width": 1.0,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "land_text_italic_not_rotated_zoomIn",
+      "type": "symbol",
+      "source": "placename",
+      "source-layer": "text",
+      "filter": [
+        "all",
+        ["==", "lang", "norsk"],
+        ["<", "scale", 250000],
+        ["==", "lang", "norsk"],
+        ["==", "bold", false],
+        ["==", "italic", true],
+        ["!in", "source", "n1000", "n2000", "n5000"],
+        [
+          "!in",
+          "sourceType",
+          "høydetallPunkt",
+          "fastmerke",
+          "høydetallVann",
+          "vann",
+          "gruppeAvTjern",
+          "tjern",
+          "bekk",
+          "myr",
+          "gruppeAvVann",
+          "delAvInnsjø",
+          "innsjø",
+          "vik",
+          "sund",
+          "foss",
+          "elv"
+        ],
+        ["in", "rotate", 0, 360, 1, 359]
+      ],
+      "layout": {
+        "text-font": ["Raleway-Italic"],
+        "text-field": ["get", "text"],
+        "text-size": ["*", ["get", "fontSize"], 2.0],
+        "text-allow-overlap": true,
+        "text-anchor": ["get", "textAnchor"],
+        "text-rotation-alignment": "viewport"
+      },
+      "paint": {
+        "text-color": ["get", "textColor"],
+        "text-halo-width": 1.0,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "land_text_italic_not_rotated",
+      "type": "symbol",
+      "source": "placename",
+      "source-layer": "text",
+      "filter": [
+        "all",
+        ["==", "lang", "norsk"],
+        ["<", "scale", 1000000],
+        ["==", "bold", false],
+        ["==", "italic", true],
+        ["!in", "source", "n2000", "n5000"],
+        [
+          "!in",
+          "sourceType",
+          "landskapsområde",
+          "juv",
+          "bakke",
+          "eidISjø",
+          "heller",
+          "annenTerrengdetalj",
+          "nesVedElver",
+          "øyr",
+          "skjærISjø",
+          "øygruppeISjø",
+          "holmegruppeISjø",
+          "fjellkant",
+          "halvøy",
+          "utmark",
+          "holme",
+          "stein",
+          "eid",
+          "øy",
+          "vidde",
+          "fjellside",
+          "skog",
+          "skogområde",
+          "mo",
+          "nes",
+          "søkk",
+          "slette",
+          "senkning",
+          "skar",
+          "berg",
+          "fjellområde",
+          "rygg",
+          "li",
+          "dal",
+          "høyde",
+          "topp",
+          "botn",
+          "hei",
+          "tettbebyggelse",
+          "tettsted",
+          "nesISjø",
+          "grunneISjø",
+          "strandISjø",
+          "haug",
+          "ås",
+          "fjell",
+          "holmeISjø",
+          "høydetallPunkt",
+          "fastmerke",
+          "høydetallVann",
+          "vann",
+          "gruppeAvTjern",
+          "tjern",
+          "bekk",
+          "myr",
+          "gruppeAvVann",
+          "delAvInnsjø",
+          "innsjø",
+          "vik",
+          "sund",
+          "foss",
+          "elv"
+        ],
+        ["in", "rotate", 0, 360, 1, 359]
+      ],
+      "layout": {
+        "text-font": ["Raleway-Italic"],
+        "text-field": ["get", "text"],
+        "text-size": ["*", ["get", "fontSize"], 2.0],
+        "text-allow-overlap": true,
+        "text-anchor": ["get", "textAnchor"],
+        "text-rotation-alignment": "viewport"
+      },
+      "paint": {
+        "text-color": ["get", "textColor"],
+        "text-halo-width": 1.0,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "land_text_italic_not_rotated_ZoomOut",
+      "type": "symbol",
+      "source": "placename",
+      "source-layer": "text",
+      "filter": [
+        "all",
+        ["==", "lang", "norsk"],
+        [">=", "scale", 1000000],
+        ["==", "bold", false],
+        ["==", "italic", true],
+        ["!in", "source", "n2000", "n5000"],
+        ["in", "sourceType", "øyISjø"]
+      ],
+      "layout": {
+        "text-font": ["Raleway-Italic"],
+        "text-field": ["get", "text"],
+        "text-size": ["*", ["get", "fontSize"], 2.5],
+        "text-allow-overlap": true,
+        "text-anchor": ["get", "textAnchor"],
+        "text-rotation-alignment": "viewport"
+      },
+      "paint": {
+        "text-color": ["get", "textColor"],
+        "text-halo-width": 1.0,
+        "text-halo-color": "rgba(255,255,255,0.7)"
+      }
+    },
+    {
+      "id": "areaNames_cities",
+      "type": "symbol",
+      "source": "areaNames",
+      "filter": ["==", ["get", "type"], "city"],
+      "layout": {
+        "text-field": ["get", "name"],
+        "text-font": ["Raleway-Bold"],
+        "text-size": 14,
+        "text-anchor": "top"
+      },
+      "paint": {
+        "text-color": "#000000",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1
+      },
+      "maxzoom": 8
+    },
+    {
+      "id": "areaNames_sea",
+      "type": "symbol",
+      "source": "areaNames",
+      "filter": ["==", ["get", "type"], "sea"],
+      "layout": {
+        "text-field": ["get", "name"],
+        "text-font": ["Raleway-Italic"],
+        "text-size": 12,
+        "text-anchor": "top"
+      },
+      "paint": {
+        "text-color": "#000000",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1
+      }
+    },
+    {
+      "id": "areaNames_islands",
+      "type": "symbol",
+      "source": "areaNames",
+      "filter": [
+        "any",
+        ["==", ["get", "type"], "island"],
+        ["==", ["get", "type"], "archipelago"]
+      ],
+      "layout": {
+        "text-field": ["get", "name"],
+        "text-font": ["Raleway-Bold"],
+        "text-size": 12,
+        "text-anchor": "top"
+      },
+      "paint": {
+        "text-color": "#000000",
+        "text-halo-color": "#ffffff",
+        "text-halo-width": 1
+      }
+    }
+  ]
+}

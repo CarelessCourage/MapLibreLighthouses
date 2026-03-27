@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title></title>
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <script src="https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js"></script>
+    <link
+      href="https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+      #menu {
+        position: absolute;
+        background: #fff;
+        padding: 10px;
+        font-family: 'Open Sans', sans-serif;
+      }
+      #features {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 300px;
+        overflow: auto;
+        background: rgba(255, 255, 255, 0.8);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="loader" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 5px; font-family: sans-serif; z-index: 1000;">
+      Loading nautical charts...
+    </div>
+    <pre id="features"></pre>
+    <div id="menu">
+      <input id="nibback" type="checkbox" name="layer" value="nibback" />
+      <label for="nibback">Norge i Bilder</label>
+      <input
+        id="water_1"
+        type="checkbox"
+        name="water_1"
+        value="water_1"
+        checked
+      />
+      <label for="water_1">Nautisk bakgrunnskart vann &lt;= 5m</label>
+      <input
+        id="water_2"
+        type="checkbox"
+        name="water_2"
+        value="water_2"
+        checked
+      />
+      <label for="water_2">Nautisk bakgrunnskart vann &gt; 5m</label>
+      <input id="land" type="checkbox" name="layer" value="land" checked />
+      <label for="land">Nautisk bakgrunnskart land</label>
+      <input
+        id="land_no"
+        type="checkbox"
+        name="layer_no"
+        value="land_no"
+        checked
+      />
+      <label for="land_no">Norge ekstra land</label>
+      <input id="tp" type="checkbox" name="tp" value="tp" checked />
+      <label for="tp">Nautisk bakgrunnskart T&P</label>
+      <input id="paper" type="checkbox" name="layer" value="paper" />
+      <label for="paper">Papirsjøkart</label>
+      <input
+        id="encwmssimplified"
+        type="checkbox"
+        name="layer"
+        value="encwmssimplified"
+      />
+      <label for="encwmssimplified">ENC WMS Simplified</label>
+      <input
+        id="encwmspaper"
+        type="checkbox"
+        name="layer"
+        value="encwmspaper"
+      />
+      <label for="encwmspaper">ENC WMS Paper</label>
+      <input id="topowms" type="checkbox" name="layer" value="topowms" />
+      <label for="topowms">Topografisk WMS</label>
+      <input
+        id="toporasterwms"
+        type="checkbox"
+        name="layer"
+        value="toporasterwms"
+      />
+      <label for="toporasterwms">Topografisk Raster WMS</label>
+      <br/>
+      <label style="margin-top:6px;display:inline-block;font-weight:bold;">Blink method:</label>
+      <select id="blinkMethod" style="margin-left:4px;">
+        <option value="filter">Filter (original)</option>
+        <option value="shader">Shader (custom layer)</option>
+      </select>
+    </div>
+
+    <script src="shaderBlink.js"></script>
+    <script>
+      var blinkMethod = 'filter';
+      document.getElementById('blinkMethod').addEventListener('change', function(e) {
+        blinkMethod = e.target.value;
+        if (blinkMethod === 'shader') {
+          map.setFilter('LIGHTS_SECTOR_CENTER', false);
+          map.setFilter('LIGHTS_SECTOR_CENTER_LONG_VALNMR', false);
+          shaderBlinkCtrl.setActive(true);
+        } else {
+          shaderBlinkCtrl.setActive(false);
+        }
+      });
+
+      var map = new maplibregl.Map({
+        container: 'map',
+        style: 'mapStyle.json?crs=EPSG:3857&excludeTP=false&api_key=',
+        center: [6.0687, 58.9226],
+        zoom: 9,
+        hash: true,
+      });
+
+      map.on('load', function() {
+        document.getElementById('loader').style.display = 'none';
+      });
+
+      map.on('mousemove', function (e) {
+        var features = map.queryRenderedFeatures(e.point);
+        var outputFeatures = [];
+        for (var i = 0; i < features.length; i++) {
+          var feature = features[i];
+          feature.geometry = { type: feature.geometry.type };
+          outputFeatures.push(feature);
+        }
+        document.getElementById('features').innerHTML = JSON.stringify(
+          features,
+          null,
+          2
+        );
+      });
+
+      var shaderBlinkCtrl = createShaderBlinkLayer(map);
+
+      var lightHighlightFilter = false;
+      var lightLongValnmrHighlightFilter = false;
+      var animationStepMS = 1000;
+
+      map.on('click', function (e) {
+        var features = map.querySourceFeatures('s57', {
+          sourceLayer: 'LIGHTS_LEG_LONG_BETWEEN',
+        });
+
+        var clickPoint = turf.point([e.lngLat.lng, e.lngLat.lat]);
+
+        var selectedSectorsFilterPart = ['in', 'ufid'];
+        var maxLightsOnN = 0;
+        for (var i = 0; i < features.length; i++) {
+          var feature = features[i];
+          if (turf.booleanIntersects(clickPoint, feature)) {
+            selectedSectorsFilterPart.push(feature.properties.ufid);
+            var lightsOnN = feature.properties['LIGHT_ON_N'];
+            if (lightsOnN > maxLightsOnN) {
+              maxLightsOnN = lightsOnN;
+            }
+          }
+        }
+
+        lightHighlightFilter = [
+          'all',
+          ['any', ['<=', 'VALNMR_MAX', 10], ['!has', 'VALNMR_MAX']],
+          ['<', 'SCALE', 100000],
+          selectedSectorsFilterPart,
+        ];
+        lightLongValnmrHighlightFilter = [
+          'all',
+          ['<', 'SCALE', 1000000],
+          ['>', 'VALNMR_MAX', 10],
+          selectedSectorsFilterPart,
+        ];
+
+        switch (maxLightsOnN) {
+          case 0:
+          case 60:
+            animationStepMS = 1000;
+            break;
+          case 120:
+            animationStepMS = 500;
+            break;
+          case 240:
+            animationStepMS = 250;
+            break;
+          case 480:
+            animationStepMS = 125;
+            break;
+          default:
+            animationStepMS = 1000;
+        }
+        console.log('animation step every ' + animationStepMS + 'ms.');
+
+        map.setFilter('LIGHTS_LEG_LONG_SIDE', lightHighlightFilter);
+        map.setFilter(
+          'LIGHTS_LEG_LONG_SIDE_LONG_VALNMR',
+          lightLongValnmrHighlightFilter
+        );
+
+        var intersectingUfids = {};
+        for (var k = 0; k < features.length; k++) {
+          if (turf.booleanIntersects(clickPoint, features[k])) {
+            var ufid = features[k].properties.ufid;
+            if (ufid) intersectingUfids[ufid] = features[k].properties;
+          }
+        }
+
+        if (blinkMethod === 'shader') {
+          var matchingUfidList = Object.keys(intersectingUfids);
+          if (matchingUfidList.length > 0) {
+            var lightPointFeatures = map.querySourceFeatures('s57', {
+              sourceLayer: 'LIGHTS',
+            });
+            var matchedLightPoints = [];
+            var seenUfids = {};
+            for (var m = 0; m < lightPointFeatures.length; m++) {
+              var lf = lightPointFeatures[m];
+              var lfUfid = lf.properties.ufid;
+              if (lfUfid && intersectingUfids[lfUfid] && !seenUfids[lfUfid]) {
+                seenUfids[lfUfid] = true;
+                var merged = Object.assign({}, lf.properties, intersectingUfids[lfUfid]);
+                matchedLightPoints.push({
+                  type: 'Feature',
+                  geometry: lf.geometry,
+                  properties: merged
+                });
+              }
+            }
+            if (matchedLightPoints.length > 0) {
+              shaderBlinkCtrl.setSelectedFeatures(matchedLightPoints);
+            }
+          }
+        }
+      });
+
+      function animationStep() {
+        if (blinkMethod !== 'filter') {
+          setTimeout(animationStep, animationStepMS);
+          return;
+        }
+        var now = new Date();
+        var currentSeconds = now.getSeconds();
+        var currentMilliSeconds = now % 60000;
+
+        var key60 = 'LIGHT_ON_' + currentSeconds;
+        var key120 = 'LIGHT_ON_' + Math.trunc(currentMilliSeconds / 500);
+        var key240 = 'LIGHT_ON_' + Math.trunc(currentMilliSeconds / 250);
+        var key480 = 'LIGHT_ON_' + Math.trunc(currentMilliSeconds / 125);
+
+        if (lightHighlightFilter != false) {
+          var centerFilter = lightHighlightFilter.slice();
+          var centerLongValnmrFilter = lightLongValnmrHighlightFilter.slice();
+
+          var timeFilterPart = [
+            'any',
+            ['all', ['==', 'LIGHT_ON_N', 60], ['==', key60, true]],
+            ['all', ['==', 'LIGHT_ON_N', 120], ['==', key120, true]],
+            ['all', ['==', 'LIGHT_ON_N', 240], ['==', key240, true]],
+            ['all', ['==', 'LIGHT_ON_N', 480], ['==', key480, true]],
+          ];
+          centerFilter.push(timeFilterPart);
+          centerLongValnmrFilter.push(timeFilterPart);
+
+          map.setFilter('LIGHTS_SECTOR_CENTER', centerFilter);
+          map.setFilter(
+            'LIGHTS_SECTOR_CENTER_LONG_VALNMR',
+            centerLongValnmrFilter
+          );
+        }
+
+        setTimeout(animationStep, animationStepMS);
+      }
+      setTimeout(animationStep, animationStepMS);
+
+      map.on('style.load', function (e) {
+        for (var i = 0; i < inputs.length; i++) {
+          var layerIdPrefix = inputs[i].value;
+          var checked = inputs[i].checked;
+          if (checked) {
+            for (var j = 0; j < map.getStyle().layers.length; j++) {
+              var layer = map.getStyle().layers[j];
+              if (!layer.id.startsWith(layerIdPrefix)) {
+                continue;
+              }
+              map.setLayoutProperty(layer.id, 'visibility', 'visible');
+            }
+          }
+        }
+
+        map.addLayer(shaderBlinkCtrl.layer);
+
+        // add extra map sources and layers for comparison in test map
+        map.addSource('paper', {
+          type: 'raster',
+          tiles: [
+            'https://tile.ecc.no/tile/sjokartrasterwms/{z}/{x}/{y}.png?api_key=AC17360A-808A-432F-BC71-1D6C3B89A03C&crs=EPSG:3857',
+          ],
+          tileSize: 256,
+          maxzoom: 18,
+        });
+        map.addLayer({
+          id: 'paper',
+          type: 'raster',
+          source: 'paper',
+          layout: {
+            visibility: 'none',
+          },
+          paint: {},
+        });
+        map.addSource('encwmspaper', {
+          type: 'raster',
+          tiles: [
+            'https://tile.ecc.no/tile/sr_encwmspaper/{z}/{x}/{y}.png?api_key=AC17360A-808A-432F-BC71-1D6C3B89A03C&crs=EPSG:3857',
+          ],
+          tileSize: 256,
+        });
+        map.addLayer({
+          id: 'encwmspaper',
+          type: 'raster',
+          source: 'encwmspaper',
+          layout: {
+            visibility: 'none',
+          },
+          paint: {},
+        });
+        map.addSource('encwmssimplified', {
+          type: 'raster',
+          tiles: [
+            'https://tile.ecc.no/tile/sr_encwmssimplified/{z}/{x}/{y}.png?api_key=AC17360A-808A-432F-BC71-1D6C3B89A03C&crs=EPSG:3857',
+          ],
+          tileSize: 256,
+        });
+        map.addLayer({
+          id: 'encwmssimplified',
+          type: 'raster',
+          source: 'encwmssimplified',
+          layout: {
+            visibility: 'none',
+          },
+          paint: {},
+        });
+        map.addSource('topowms', {
+          type: 'raster',
+          tiles: [
+            'https://tile.ecc.no/tile/kartdata3/{z}/{x}/{y}.png?api_key=AC17360A-808A-432F-BC71-1D6C3B89A03C&crs=EPSG:3857',
+          ],
+          tileSize: 256,
+          maxzoom: 20,
+        });
+        map.addLayer({
+          id: 'topowms',
+          type: 'raster',
+          source: 'topowms',
+          layout: {
+            visibility: 'none',
+          },
+          paint: {},
+        });
+        map.addSource('toporasterwms', {
+          type: 'raster',
+          tiles: [
+            'https://tile.ecc.no/tile/toporaster/{z}/{x}/{y}.png?api_key=AC17360A-808A-432F-BC71-1D6C3B89A03C&crs=EPSG:3857',
+          ],
+          tileSize: 256,
+          maxzoom: 20,
+        });
+        map.addLayer({
+          id: 'toporasterwms',
+          type: 'raster',
+          source: 'toporasterwms',
+          layout: {
+            visibility: 'none',
+          },
+          paint: {},
+        });
+        map.addSource('nib', {
+          type: 'raster',
+          tiles: [
+            'https://nbc.maplytic.no/tile/nib/{z}/{x}/{y}.jpeg?crs=EPSG:3857',
+          ],
+          tilesDEV: [
+            'http://127.0.0.1:8083/tile/maplytic-repos/nautisk_bakgrunnskart/public/nib/{z}/{x}/{y}.jpeg?crs=EPSG:3857',
+          ],
+          tileSize: 256,
+          maxzoom: 20,
+        });
+        var firstLayerId = map.getStyle().layers[0].id;
+        map.addLayer(
+          {
+            id: 'nibback',
+            type: 'raster',
+            source: 'nib',
+            layout: {
+              visibility: 'none',
+            },
+            paint: {},
+          },
+          firstLayerId
+        );
+      });
+
+      var layerList = document.getElementById('menu');
+      var inputs = layerList.getElementsByTagName('input');
+
+      function toggleLayer(layer) {
+        var layerIdPrefix = layer.target.value;
+        var checked = layer.target.checked;
+        for (var i = 0; i < map.getStyle().layers.length; i++) {
+          var layer = map.getStyle().layers[i];
+          if (!layer.id.startsWith(layerIdPrefix)) {
+            continue;
+          }
+          if (checked) {
+            map.setLayoutProperty(layer.id, 'visibility', 'visible');
+          } else {
+            map.setLayoutProperty(layer.id, 'visibility', 'none');
+          }
+        }
+      }
+
+      function toggleTP(e) {
+        updateMapStyleURL();
+      }
+
+      for (var i = 0; i < inputs.length; i++) {
+        // not for T&P checkbox
+        if (inputs[i].id == 'tp') {
+          inputs[i].onclick = toggleTP;
+        } else {
+          inputs[i].onclick = toggleLayer;
+        }
+      }
+
+      function excludeTP() {
+        var scaleModeSelectElement = document.getElementById('tp');
+        return !scaleModeSelectElement.checked;
+      }
+    </script>
+  </body>
+</html>
