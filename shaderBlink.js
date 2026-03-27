@@ -1,3 +1,32 @@
+/**
+ * Shader-based blinking lighthouse layer for MapLibre GL.
+ *
+ * Renders lighthouse points as GL_POINTS that blink on/off according to real-world
+ * light patterns. Instead of toggling visibility per-light on the CPU each frame,
+ * all blink patterns are encoded into a single RGBA texture (the "blink texture")
+ * and the GPU fragment shader samples it based on the current time to decide
+ * whether each light is on or off.
+ *
+ * Texture layout:
+ *   - Width:  480 pixels (one pixel per time slot)
+ *   - Height: one row per lighthouse
+ *   - RGBA channels encode four timing resolutions so lights with different
+ *     cycle lengths share the same texture:
+ *       R = 60 slots  @ 1000ms each  (60s cycle)
+ *       G = 120 slots @  500ms each  (60s cycle)
+ *       B = 240 slots @  250ms each  (60s cycle)
+ *       A = 480 slots @  125ms each  (60s cycle)
+ *     A light only writes to the ONE channel matching its slot count (lightOnN).
+ *     The shader samples all four channels and takes the max, so only the
+ *     populated channel contributes.
+ *
+ * Vertex data (per point): [mercatorX, mercatorY, r, g, b, lightIndex]
+ *   - lightIndex maps the point to its texture row for the blink lookup.
+ *
+ * Each frame the shader receives u_time = Date.now() % 60000 (ms within the
+ * current minute), divides by the per-channel slot duration to find the current
+ * column, samples the texture, and discards the fragment when the light is off.
+ */
 var BLINK_TEXTURE_WIDTH = 480;
 
 function createShaderBlinkLayer(mapInstance) {
@@ -148,8 +177,13 @@ function createShaderBlinkLayer(mapInstance) {
       }
 
       this.lightCount = selectedLights.length;
+
+      // 6 floats per light: [mercatorX, mercatorY, r, g, b, lightIndex]
       var vertices = new Float32Array(selectedLights.length * 6);
 
+      // Flat RGBA pixel array for the blink texture.
+      // Dimensions: BLINK_TEXTURE_WIDTH (480) x selectedLights.length
+      // Each pixel = 4 bytes (R, G, B, A), one channel per timing resolution.
       var textureData = new Uint8Array(BLINK_TEXTURE_WIDTH * 4 * selectedLights.length);
 
       for (var i = 0; i < selectedLights.length; i++) {
@@ -163,6 +197,8 @@ function createShaderBlinkLayer(mapInstance) {
         vertices[offset + 4] = light.color[2];
         vertices[offset + 5] = i;
 
+        // lightOnN determines which RGBA channel and how many slots to fill.
+        // Only the matching channel gets data; the rest stay 0.
         var lightOnN = light.lightOnN || 60;
         var rowOffset = i * BLINK_TEXTURE_WIDTH * 4;
 
@@ -222,6 +258,7 @@ function createShaderBlinkLayer(mapInstance) {
     return { lng: centroid.geometry.coordinates[0], lat: centroid.geometry.coordinates[1] };
   }
 
+  /** Converts GeoJSON features (with LIGHT_ON_* properties) into the internal selectedLights array and flags a buffer rebuild. */
   function setSelectedFeatures(features) {
     selectedLights = [];
     var seen = {};
